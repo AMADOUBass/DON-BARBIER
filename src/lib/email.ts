@@ -1,13 +1,18 @@
 import nodemailer from "nodemailer";
 import { prisma } from "@/lib/prisma";
 
+const smtpHost = process.env.SMTP_HOST;
+if (!smtpHost && process.env.NODE_ENV === "production") {
+  console.warn("WARNING: SMTP_HOST is not set. Emails will not be sent.");
+}
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
+  host: smtpHost || "localhost",
   port: Number(process.env.SMTP_PORT ?? 587),
   secure: false,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER || "placeholder",
+    pass: process.env.SMTP_PASS || "placeholder",
   },
 });
 

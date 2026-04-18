@@ -9,7 +9,7 @@ export const authConfig = {
     error: "/login",
   },
   session: { strategy: "jwt" as const },
-  secret: process.env.AUTH_SECRET,
+  secret: process.env.AUTH_SECRET || "somewhere-something-secret",
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {

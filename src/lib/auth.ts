@@ -18,8 +18,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma) as any,
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      clientId: process.env.AUTH_GOOGLE_ID || "google-placeholder-id",
+      clientSecret: process.env.AUTH_GOOGLE_SECRET || "google-placeholder-secret",
     }),
     Credentials({
       name: "credentials",
