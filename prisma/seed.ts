@@ -162,18 +162,6 @@ async function main() {
 
   await prisma.product.create({ 
     data: { 
-      name: "Shampoing Hydratant 'Heritage'", 
-      slug: "shampoing-heritage", 
-      price: 38, 
-      stock: 20, 
-      images: ["https://images.unsplash.com/photo-1559599141-3816a0b37207?q=80&w=2070"], 
-      categoryId: catH.id, 
-      description: "Formule sans sulfate enrichie en huiles naturelles pour nettoyer en profondeur sans agresser le cuir chevelu." 
-    } 
-  });
-
-  await prisma.product.create({ 
-    data: { 
       name: "Coffret Cadeau 'Le Don'", 
       slug: "coffret-cadeau-don", 
       price: 120, 
