@@ -29,6 +29,7 @@ import {
   CalendarPlus,
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
+import { MembershipTier } from "@prisma/client";
 import toast from "react-hot-toast";
 import { formatPrice } from "@/lib/utils";
 import { UploadDropzone } from "@/lib/uploadthing";
@@ -88,6 +89,8 @@ interface Props {
     image: string | null;
     role: string;
     isMember: boolean;
+    membershipTier: MembershipTier | string;
+    coupesUsed: number;
     phone: string | null;
     loyaltyPoints: number;
   };
@@ -388,10 +391,10 @@ export function AccountClient({
               <h1 className="font-display text-2xl font-bold text-brand-beige">
                 {user.name ?? "Mon compte"}
               </h1>
-              {isMember && user.role === "CLIENT" && (
+              {user.membershipTier !== "NONE" && user.role === "CLIENT" && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-gold bg-brand-gold/10 border border-brand-gold/20 px-2.5 py-0.5 rounded-full">
                   <Crown className="w-3 h-3" />
-                  Membre Don Barbier
+                  Club {user.membershipTier.charAt(0) + user.membershipTier.slice(1).toLowerCase()}
                 </span>
               )}
             </div>
@@ -728,36 +731,51 @@ export function AccountClient({
                 : "Sauvegarder les modifications"}
             </button>
 
-            {/* Membership CTA */}
-            {!isMember && user.role === "CLIENT" && (
+            {/* Membership Tier Card */}
+            {user.role === "CLIENT" && (
               <div className="card border border-brand-gold/20 bg-brand-gold/5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center shrink-0">
-                    <Sparkles className="w-6 h-6 text-brand-gold" />
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center shrink-0">
+                      <Crown className="w-6 h-6 text-brand-gold" />
+                    </div>
+                    <div>
+                      <h3 className="font-display text-lg font-semibold text-brand-beige">
+                        Statut Club Privé : <span className="text-brand-gold">{user.membershipTier !== "NONE" ? user.membershipTier : "Non-membre"}</span>
+                      </h3>
+                      <p className="text-sm text-brand-muted mt-1">
+                        {user.membershipTier === "NONE" 
+                          ? "Rejoignez le club pour profiter d'avantages exclusifs et de coupes mensuelles."
+                          : `Vous profitez pleinement de vos avantages forfait ${user.membershipTier}.`}
+                      </p>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-display text-lg font-semibold text-brand-beige">
-                      Devenir membre Don Barbier
-                    </h3>
-                    <p className="text-sm text-brand-muted mt-1">
-                      Accédez à des prix exclusifs sur les produits,
-                      des offres spéciales et une expérience
-                      personnalisée. C&apos;est gratuit !
-                    </p>
-                    <button
-                      onClick={handleActivateMembership}
-                      disabled={memberLoading}
-                      className="btn-primary mt-4 gap-2 text-sm">
-                      {memberLoading ? (
-                        <span className="w-4 h-4 border-2 border-brand-black/30 border-t-brand-black rounded-full animate-spin" />
-                      ) : (
-                        <Crown className="w-4 h-4" />
-                      )}
-                      {memberLoading
-                        ? "Activation..."
-                        : "Devenir membre — Gratuit"}
-                    </button>
-                  </div>
+                  
+                  {user.membershipTier !== "NONE" ? (
+                    <div className="flex flex-col items-center md:items-end gap-2">
+                       <div className="flex items-center gap-2">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div 
+                              key={i} 
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${
+                                i <= (user as any).coupesUsed 
+                                  ? "bg-brand-gold border-brand-gold text-brand-black" 
+                                  : "border-brand-gold/30 text-brand-gold/50"
+                              }`}
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                          ))}
+                       </div>
+                       <p className="text-[10px] uppercase tracking-widest text-brand-gold/80 font-bold">
+                          {4 - (user as any).coupesUsed} coupes restantes ce mois
+                       </p>
+                    </div>
+                  ) : (
+                    <Link href="/club" className="btn-primary py-2 px-6 text-sm">
+                      Voir les forfaits
+                    </Link>
+                  )}
                 </div>
               </div>
             )}

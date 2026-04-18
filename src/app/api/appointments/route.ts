@@ -106,15 +106,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Ce créneau n'est plus disponible (conflit d'horaire)" }, { status: 409 });
   }
 
+  // Membership Logic
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { membershipTier: true, coupesUsed: true },
+  });
+
+  const isHaircut = ["fade-classique", "buzz-cut", "caesar-cut", "side-part", "drop-fade", "burst-fade", "bald-fade"].includes(service.slug);
+  const isEliteService = scheduledDate.getHours() >= 18;
+  
+  if (isEliteService && (!user || (user.membershipTier !== "ELITE" && user.membershipTier !== "PRESTIGE"))) {
+    return NextResponse.json({ error: "Les créneaux après 18h sont réservés aux membres Élite et Prestige" }, { status: 403 });
+  }
+
+  const hasCredits = user && user.membershipTier !== "NONE" && isHaircut && user.coupesUsed < 4;
+
   const subtotal = parseFloat(service.basePrice.toString());
   const tax = parseFloat((subtotal * 0.14975).toFixed(2));
   const totalPrice = subtotal + tax;
   
   const depositPct = service.depositPct;
-  const depositAmount = totalPrice * (depositPct / 100);
+  const depositAmount = hasCredits ? 0 : totalPrice * (depositPct / 100);
   const depositCents = Math.round(depositAmount * 100);
 
-  // Create appointment in PENDING state
+  // Create appointment
   const appointment = await prisma.appointment.create({
     data: {
       clientId: session.user.id,
@@ -125,15 +140,42 @@ export async function POST(req: NextRequest) {
       totalPrice: totalPrice.toFixed(2),
       depositAmount: depositAmount.toFixed(2),
       depositPct,
-      paymentMethod,
-      notes,
-      status: "PENDING",
+      paymentMethod: hasCredits ? "INTERAC" : paymentMethod, // Placeholder if no payment needed
+      notes: notes + (hasCredits ? " (Utilisé crédit Club Privé)" : ""),
+      status: hasCredits ? "ACCEPTED" : "PENDING",
     },
     include: {
       service: true,
       stylist: { include: { user: true } },
     },
   });
+
+  // If using membership credits, we're done here
+  if (hasCredits) {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { coupesUsed: { increment: 1 } },
+    });
+
+    const { formatPrice } = await import("@/lib/utils");
+    const { sendEmail } = await import("@/lib/email");
+    const { format } = await import("date-fns");
+    const { fr } = await import("date-fns/locale");
+
+    await sendEmail({
+      to: session.user.email!,
+      template: "appointment_confirmed",
+      data: {
+        clientName: session.user.name ?? "Club Membre",
+        serviceName: service.name,
+        stylistName: appointment.stylist.user.name ?? "Styliste",
+        appointmentDate: format(appointment.scheduledAt, "EEEE d MMMM yyyy 'à' HH:mm", { locale: fr }),
+        totalPrice: formatPrice(0),
+      },
+    });
+
+    return NextResponse.json({ success: true, appointmentId: appointment.id, message: "Réservé via vos crédits Club Privé" });
+  }
 
   if (paymentMethod === "INTERAC") {
     const { formatPrice } = await import("@/lib/utils");
@@ -165,7 +207,7 @@ export async function POST(req: NextRequest) {
     stylistName: appointment.stylist.user.name ?? "Styliste",
     totalAmountCents: Math.round(parseFloat(totalPrice.toString()) * 100),
     depositPercent: depositPct,
-    clientEmail: session.user.email,
+    clientEmail: session.user.email ?? undefined,
     successUrl: `${origin}/booking/success?appointmentId=${appointment.id}`,
     cancelUrl: `${origin}/booking?cancelled=true`,
   });

@@ -63,7 +63,7 @@ export function HeroSection() {
           >
             <Star className="w-4 h-4 text-brand-gold fill-brand-gold" />
             <span className="text-sm text-brand-gold font-medium">
-              Plus de 15 ans d&apos;expertise en grooming & coiffure afro
+              Plus de 7 ans d&apos;expertise en grooming & coiffure afro
             </span>
           </motion.div>
 
@@ -119,7 +119,7 @@ export function HeroSection() {
             className="mt-12 sm:mt-16 grid grid-cols-2 sm:flex sm:flex-wrap gap-8 sm:gap-10"
           >
             {[
-              { value: 15, suffix: "+", label: "Années d'expérience" },
+              { value: 7, suffix: "+", label: "Années d'expérience" },
               { value: 5000, suffix: "+", label: "Clients satisfaits" },
               { value: 5, suffix: "", label: "Nos Stylistes" },
             ].map((stat) => (
@@ -142,8 +142,8 @@ export function HeroSection() {
         >
           <div className="relative w-full aspect-[4/5] max-w-lg ml-auto rounded-2xl overflow-hidden border border-brand-gold/20 shadow-gold-lg">
             <Image
-              src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2070&auto=format&fit=crop"
-              alt="Salon Don Barbier — l'Excellence"
+              src="/images/home/don-hero.png"
+              alt="Elvis 'Don' Berwa — l'Excellence"
               fill
               className="object-cover"
               quality={100}

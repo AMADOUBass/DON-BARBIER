@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { MembershipTier } from "@prisma/client";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY || "";
 
@@ -30,7 +31,7 @@ export async function createBookingCheckout({
   stylistName: string;
   totalAmountCents: number;
   depositPercent: number;
-  clientEmail: string;
+  clientEmail?: string;
   successUrl: string;
   cancelUrl: string;
 }) {
@@ -81,7 +82,7 @@ export async function createProductCheckout({
   orderId: string;
   lineItems: { name: string; description?: string; amountCents: number; quantity: number; imageUrl?: string }[];
   taxAmountCents?: number;
-  clientEmail: string;
+  clientEmail?: string;
   successUrl: string;
   cancelUrl: string;
 }) {
@@ -122,6 +123,52 @@ export async function createProductCheckout({
     shipping_address_collection: {
       allowed_countries: ["CA"],
     },
+  });
+
+  return session;
+}
+
+// ─── Subscription checkout ───────────────────────────────────────────────────
+
+export async function createSubscriptionCheckout({
+  userId,
+  tier,
+  priceAmountCents,
+  clientEmail,
+  successUrl,
+  cancelUrl,
+}: {
+  userId: string;
+  tier: MembershipTier;
+  priceAmountCents: number;
+  clientEmail?: string;
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer_email: clientEmail,
+    line_items: [
+      {
+        price_data: {
+          currency: "cad",
+          product_data: {
+            name: `Club Privé — Forfait ${tier.charAt(0) + tier.slice(1).toLowerCase()}`,
+            description: `Abonnement mensuel au Club Privé de Don Barbier. Accès exclusif et avantages membres.`,
+          },
+          unit_amount: priceAmountCents,
+          recurring: { interval: "month" },
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      userId,
+      type: "MEMBERSHIP_SUBSCRIPTION",
+      tier: tier,
+    },
+    success_url: successUrl,
+    cancel_url: cancelUrl,
   });
 
   return session;

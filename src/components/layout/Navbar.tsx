@@ -15,6 +15,7 @@ import { CartSync } from "@/components/cart/CartSync";
 const navLinks = [
   { href: "/", label: "Accueil" },
   { href: "/services", label: "Services" },
+  { href: "/club", label: "Club Privé" },
   { href: "/booking", label: "Réserver" },
   { href: "/shop", label: "Boutique" },
   { href: "/gallery", label: "Galerie" },

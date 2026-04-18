@@ -16,7 +16,12 @@ model User {
   passwordHash     String?
   role             Role          @default(CLIENT)
   isMember         Boolean       @default(false)
+  membershipTier   MembershipTier @default(NONE)
   memberSince      DateTime?
+  lastResetDate    DateTime?
+  stripeSubId      String?       @unique
+  coupesUsed       Int           @default(0)
+  homeAddress      String?
   loyaltyPoints    Int           @default(0)
   marketingConsent Boolean       @default(false)
   createdAt        DateTime      @default(now())
@@ -332,6 +337,13 @@ enum Role {
   CLIENT
   STYLIST
   ADMIN
+}
+
+enum MembershipTier {
+  NONE
+  SIGNATURE
+  ELITE
+  PRESTIGE
 }
 
 enum AppointmentStatus {

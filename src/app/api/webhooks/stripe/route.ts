@@ -6,6 +6,7 @@ import { formatPrice } from "@/lib/utils";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import type Stripe from "stripe";
+import { MembershipTier } from "@prisma/client";
 
 export const runtime = "nodejs";
 
@@ -34,6 +35,15 @@ export async function POST(req: NextRequest) {
       await handleProductOrderPaid(session, orderId);
     } else if (type === "APPOINTMENT_DEPOSIT" && appointmentId) {
       await handleAppointmentDepositPaid(session, appointmentId);
+    } else if (type === "MEMBERSHIP_SUBSCRIPTION" && session.metadata?.userId) {
+      await handleMembershipSubscribed(session, session.metadata.userId, session.metadata.tier as MembershipTier);
+    }
+  }
+
+  if (event.type === "invoice.paid") {
+    const invoice = event.data.object as Stripe.Invoice;
+    if (invoice.subscription) {
+      await handleSubscriptionRenewed(invoice.subscription as string);
     }
   }
 
@@ -174,3 +184,46 @@ async function handleAppointmentDepositPaid(session: Stripe.Checkout.Session, ap
   }
 }
 
+async function handleMembershipSubscribed(session: Stripe.Checkout.Session, userId: string, tier: MembershipTier) {
+  const subscriptionId = session.subscription as string;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      isMember: true,
+      membershipTier: tier,
+      stripeSubId: subscriptionId,
+      coupesUsed: 0,
+      lastResetDate: new Date(),
+      memberSince: new Date(),
+    },
+  });
+
+  // Optionally send a "Welcome to the Club" email
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (user?.email) {
+    try {
+      await sendEmail({
+        to: user.email,
+        template: "welcome_club",
+        data: {
+          clientName: user.name ?? "Nouveau Membre",
+          tierName: tier.charAt(0) + tier.slice(1).toLowerCase(),
+        },
+      });
+    } catch (err) {
+      console.error("[webhook-stripe] Welcome email failed:", err);
+    }
+  }
+}
+
+async function handleSubscriptionRenewed(subscriptionId: string) {
+  // Reset coupes count on every billing cycle
+  await prisma.user.updateMany({
+    where: { stripeSubId: subscriptionId },
+    data: {
+      coupesUsed: 0,
+      lastResetDate: new Date(),
+    },
+  });
+}

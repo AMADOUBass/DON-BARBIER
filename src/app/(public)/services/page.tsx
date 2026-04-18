@@ -2,25 +2,60 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = "force-dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, DollarSign, ChevronRight, Scissors, Sparkles } from "lucide-react";
+import { 
+  Clock, 
+  DollarSign, 
+  ChevronRight, 
+  Scissors, 
+  Sparkles, 
+  Flame, 
+  Waves, 
+  Palette, 
+  User, 
+  PlusCircle,
+  Gem,
+  Info
+} from "lucide-react";
 import { formatPrice } from "@/lib/utils";
 import type { Metadata } from "next";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "Nos Services | Don Barbier",
-  description: "Découvrez tous nos services de coiffure afro à Québec — retwist, tresses, loc maintenance et plus encore.",
+  description: "Catalogue complet de coiffure afro et service de barbier premium à Québec. Fade, Locs, Tresses et Soins Barbe.",
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
-  classic: "Coupes Classiques",
-  trending: "Coupes Tendances",
-  fade: "Dégradés Spécialisés",
-  design: "Design & Finitions",
-  barbe: "Barbe & Rasage",
+  classic: "Classiques",
+  trending: "Tendances",
+  fade: "Dégradés",
+  design: "Art & Design",
+  barbe: "Soins Barbe",
   locks: "Locs & Retwist",
   braids: "Tresses & Nattes",
-  extra: "Extras & Soins",
+  extra: "Soins & Plus",
+};
+
+const CATEGORY_ICONS: Record<string, any> = {
+  classic: User,
+  trending: Flame,
+  fade: Scissors,
+  design: Palette,
+  barbe: Gem,
+  locks: Sparkles,
+  braids: Waves,
+  extra: PlusCircle,
+};
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  locks: "/images/services/retwist.png",
+  braids: "/images/services/braids.png",
+  fade: "/images/services/specialized-fade.png",
+  classic: "/images/services/classic-cut.png",
+  trending: "/images/services/trending-style.png",
+  design: "/images/services/design-art.png",
+  barbe: "/images/services/beard-grooming.png",
+  extra: "/images/services/extras-grooming.png",
 };
 
 const CATEGORY_ORDER = ["locks", "braids", "fade", "classic", "trending", "design", "barbe", "extra"];
@@ -46,148 +81,252 @@ export default async function ServicesPage() {
     {}
   );
 
-  // Add any uncategorized
-  const known = new Set(CATEGORY_ORDER);
-  services.forEach((s) => {
-    if (!known.has(s.category)) {
-      if (!grouped[s.category]) grouped[s.category] = [];
-      grouped[s.category]!.push(s);
-    }
-  });
-
   return (
-    <div className="min-h-screen pt-0 pb-20 bg-brand-black">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <ScrollReveal>
-          <div className="text-center mb-12">
-            <p className="text-brand-gold text-sm font-medium uppercase tracking-widest mb-3">
-              Expertise Barbier & Afro
-            </p>
-            <h1 className="section-title">Nos Services</h1>
-            <div className="divider-gold" />
-            <p className="text-brand-muted max-w-xl mx-auto mt-4 text-sm leading-relaxed">
-              Une gamme complète de soins pour l&apos;homme moderne et l&apos;entretien des textures naturelles. 
-              Précision, style et bien-être à chaque rendez-vous.
-            </p>
-          </div>
-        </ScrollReveal>
+    <div className="min-h-screen pt-0 pb-20 bg-brand-black text-brand-beige">
+      {/* 1. Hero / Header Section */}
+      <section className="relative overflow-hidden pt-20 pb-16 bg-gradient-to-b from-brand-charcoal/30 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <ScrollReveal>
+            <div className="text-center mb-12">
+              <span className="inline-block px-4 py-1.5 rounded-full border border-brand-gold/20 bg-brand-gold/5 text-brand-gold text-[10px] font-bold uppercase tracking-widest mb-4">
+                L&apos;Art du Grooming & de l&apos;Afro
+              </span>
+              <h1 className="font-display text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+                Nos <span className="text-brand-gold">Services</span>
+              </h1>
+              <p className="text-brand-muted max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+                Une expertise unique à Québec combinant la précision millimétrée du barbier vintage 
+                et la maîtrise ancestrale des textures afro naturelles.
+              </p>
+            </div>
+          </ScrollReveal>
 
-        {/* Quick Nav */}
-        <div className="sticky top-20 z-30 mb-12 py-4 -mx-4 px-4 bg-brand-black/90 backdrop-blur-md border-y border-brand-gold/10 overflow-x-auto no-scrollbar hidden sm:flex justify-center">
-          <div className="flex gap-2">
-            {Object.entries(grouped).map(([cat, items]) => (
-              <a 
-                key={cat} 
-                href={`#${cat}`}
-                className="px-4 py-2 rounded-full text-xs font-medium border border-brand-charcoal text-brand-muted hover:border-brand-gold hover:text-brand-gold transition-all whitespace-nowrap"
-              >
-                {CATEGORY_LABELS[cat] ?? cat} ({items.length})
-              </a>
-            ))}
-          </div>
+          {/* 2. Visual Navigation Grid (Improved layout) */}
+          <ScrollReveal>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-16">
+              {CATEGORY_ORDER.map((cat) => {
+                const items = grouped[cat] || [];
+                if (!items.length) return null;
+                const Icon = CATEGORY_ICONS[cat] || Sparkles;
+                return (
+                  <a 
+                    key={cat}
+                    href={`#${cat}`}
+                    className="group relative h-32 md:h-48 rounded-2xl overflow-hidden border border-brand-charcoal/50 hover:border-brand-gold/30 transition-all duration-500 bg-brand-charcoal/20"
+                  >
+                    <Image
+                      src={CATEGORY_IMAGES[cat] || "/images/placeholder-service.png"}
+                      alt={CATEGORY_LABELS[cat] ?? cat}
+                      fill
+                      className="object-cover opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-black via-brand-black/20 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4 z-20">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon className="w-4 h-4 text-brand-gold" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-brand-gold/80">
+                          {items.length} services
+                        </span>
+                      </div>
+                      <h3 className="font-display text-sm md:text-lg font-bold group-hover:translate-x-1 transition-transform">
+                        {CATEGORY_LABELS[cat]}
+                      </h3>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </ScrollReveal>
         </div>
+      </section>
 
-        {/* Category groups */}
-        <div className="space-y-16">
-          {Object.entries(grouped).map(([cat, items]) => (
-            <section key={cat} id={cat} className="scroll-mt-32">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-8 h-8 bg-brand-gold/10 border border-brand-gold/20 rounded-lg flex items-center justify-center">
-                  <Scissors className="w-4 h-4 text-brand-gold" />
-                </div>
-                <h2 className="font-display text-2xl font-bold text-brand-beige">
-                  {CATEGORY_LABELS[cat] ?? cat}
+      {/* 3. Main Content Area with Sidebar Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* Left Sidebar (Desktop only) */}
+          <aside className="hidden lg:block w-72 shrink-0">
+            <div className="sticky top-28 space-y-8">
+              <div className="p-6 rounded-2xl bg-brand-charcoal/20 border border-brand-charcoal/40">
+                <h2 className="font-display text-xs font-bold uppercase tracking-widest text-brand-gold mb-6">
+                  Navigation
                 </h2>
-                <div className="flex-1 h-px bg-brand-gold/20 ml-2" />
+                <nav className="space-y-1">
+                  {CATEGORY_ORDER.map((cat) => {
+                    const items = grouped[cat] || [];
+                    if (!items.length) return null;
+                    const Icon = CATEGORY_ICONS[cat] || Sparkles;
+                    return (
+                      <a 
+                        key={cat}
+                        href={`#${cat}`}
+                        className="flex items-center justify-between group px-3 py-2.5 rounded-xl hover:bg-brand-gold/5 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <Icon className="w-4 h-4 text-brand-muted group-hover:text-brand-gold" />
+                          <span className="text-sm font-medium text-brand-muted group-hover:text-brand-beige">
+                            {CATEGORY_LABELS[cat]}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-brand-charcoal group-hover:text-brand-gold">
+                          {items.length}
+                        </span>
+                      </a>
+                    );
+                  })}
+                </nav>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {items.map((service) => {
-                  const priceNum = service.basePrice ? parseFloat(service.basePrice.toString()) : 0;
-                  const depositPct = service.depositPct ?? 30;
-                  const depositAmt = (priceNum * depositPct) / 100;
-                  return (
-                    <article
-                      key={service.id}
-                      className="card card-hover group flex flex-col"
-                    >
-                      {/* Image or placeholder */}
-                      {service.imageUrl ? (
-                        <div className="relative h-44 -mx-5 -mt-5 mb-5 overflow-hidden rounded-t-2xl">
-                          <Image
-                            src={service.imageUrl}
-                            alt={service.name}
-                            fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-brand-black/60 to-transparent" />
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-24 bg-brand-gold/5 rounded-xl mb-4 border border-brand-gold/10">
-                          <Sparkles className="w-8 h-8 text-brand-gold/40" />
-                        </div>
-                      )}
+              {/* Promo / Info Card */}
+              <div className="p-6 rounded-2xl bg-brand-gold/5 border border-brand-gold/20 overflow-hidden relative group">
+                <Gem className="w-12 h-12 text-brand-gold/10 absolute -right-2 -bottom-2 group-hover:scale-110 transition-transform" />
+                <h3 className="text-sm font-bold text-brand-gold mb-2">Membre Don</h3>
+                <p className="text-xs text-brand-muted leading-relaxed">
+                  Bénéficiez de tarifs exclusifs et d&apos;un accès prioritaire aux nouveaux créneaux.
+                </p>
+                <Link href="/login?tab=register" className="mt-4 block text-[10px] uppercase font-bold text-brand-beige hover:text-brand-gold tracking-widest transition-colors">
+                  Devenir membre &rarr;
+                </Link>
+              </div>
+            </div>
+          </aside>
 
-                      <div className="flex-1">
-                        <h3 className="font-display text-lg font-semibold text-brand-beige group-hover:text-brand-gold transition-colors">
-                          {service.name}
-                        </h3>
-                        {service.description && (
-                          <p className="text-sm text-brand-muted mt-2 leading-relaxed line-clamp-2">
-                            {service.description}
+          {/* Right Content (The Services) */}
+          <main className="flex-1 space-y-24">
+            {Object.entries(grouped).map(([cat, items]) => {
+              const CategoryIcon = CATEGORY_ICONS[cat] || Sparkles;
+              return (
+                <section key={cat} id={cat} className="scroll-mt-32">
+                  <ScrollReveal>
+                    <div className="flex items-center justify-between mb-10 pb-4 border-b border-brand-charcoal/50">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-brand-gold/10 border border-brand-gold/20 flex items-center justify-center">
+                          <CategoryIcon className="w-6 h-6 text-brand-gold" />
+                        </div>
+                        <div>
+                          <h2 className="font-display text-2xl md:text-3xl font-bold tracking-tight">
+                            {CATEGORY_LABELS[cat]}
+                          </h2>
+                          <p className="text-[10px] uppercase tracking-widest text-brand-muted mt-1">
+                            {items.length} services disponibles
                           </p>
-                        )}
-                      </div>
-
-                      <div className="mt-4 pt-4 border-t border-brand-charcoal flex items-center justify-between">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 text-brand-gold font-semibold">
-                            <DollarSign className="w-4 h-4" />
-                            {formatPrice(priceNum)}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-brand-muted">
-                            <Clock className="w-3.5 h-3.5" />
-                            {service.durationMins} min · Dépôt{" "}
-                            {formatPrice(depositAmt)}
-                          </div>
                         </div>
-                        <Link
-                          href={`/booking?serviceId=${service.id}`}
-                          className="btn-primary text-xs px-4 py-2 flex items-center gap-1"
-                        >
-                          Réserver <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
                       </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-        </div>
+                    </div>
+                  </ScrollReveal>
 
-        {/* CTA */}
-        <div className="mt-20 text-center card max-w-2xl mx-auto">
-          <Sparkles className="w-10 h-10 text-brand-gold mx-auto mb-4" />
-          <h2 className="font-display text-2xl font-bold text-brand-beige mb-2">
-            Besoin d&apos;un conseil ?
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {items.map((service) => {
+                      const priceNum = service.basePrice ? parseFloat(service.basePrice.toString()) : 0;
+                      return (
+                        <ScrollReveal key={service.id}>
+                          <article className="group relative p-6 rounded-2xl bg-brand-charcoal/20 border border-brand-charcoal/40 hover:border-brand-gold/30 transition-all duration-300">
+                            <div className="flex justify-between items-start mb-4">
+                              <div className="flex-1 pr-4">
+                                <h3 className="font-display text-lg font-bold group-hover:text-brand-gold transition-colors">
+                                  {service.name}
+                                </h3>
+                                <div className="flex items-center gap-4 mt-2">
+                                  <div className="flex items-center gap-1.5 text-xs text-brand-muted">
+                                    <Clock className="w-3.5 h-3.5 text-brand-gold/60" />
+                                    {service.durationMins} min
+                                  </div>
+                                  <div className="flex items-center gap-1.5 text-xs text-brand-muted">
+                                    <Info className="w-3.5 h-3.5 text-brand-gold/60" />
+                                    Dépôt {Math.round(service.depositPct ?? 30)}%
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-xl font-display font-bold text-brand-beige">
+                                {formatPrice(priceNum)}
+                              </div>
+                            </div>
+
+                            {service.description && (
+                              <p className="text-sm text-brand-muted mb-6 leading-relaxed line-clamp-2">
+                                {service.description}
+                              </p>
+                            )}
+
+                            <div className="flex items-center justify-between pt-4 border-t border-brand-charcoal/50">
+                              <div className="flex -space-x-2">
+                                {service.stylistServices.slice(0, 3).map((ss, idx) => (
+                                  <div 
+                                    key={idx} 
+                                    className="w-8 h-8 rounded-full border-2 border-brand-black bg-brand-charcoal flex items-center justify-center text-[10px] font-bold text-brand-gold"
+                                    title={ss.stylist.user.name ?? ""}
+                                  >
+                                    {ss.stylist.user.name?.[0]}
+                                  </div>
+                                ))}
+                                {service.stylistServices.length > 3 && (
+                                  <div className="w-8 h-8 rounded-full border-2 border-brand-black bg-brand-black flex items-center justify-center text-[10px] font-bold text-brand-muted">
+                                    +{service.stylistServices.length - 3}
+                                  </div>
+                                )}
+                              </div>
+                              <Link
+                                href={`/booking?serviceId=${service.id}`}
+                                className="px-5 py-2 rounded-xl bg-brand-gold text-brand-black text-xs font-bold hover:bg-brand-beige transition-colors flex items-center gap-2"
+                              >
+                                Réserver <ChevronRight className="w-4 h-4" />
+                              </Link>
+                            </div>
+                          </article>
+                        </ScrollReveal>
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })}
+          </main>
+        </div>
+      </div>
+
+      {/* 4. CTA Section */}
+      <section className="mt-32 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative p-12 rounded-3xl overflow-hidden text-center bg-brand-gold/5 border border-brand-gold/10">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-gold to-transparent opacity-50" />
+          <Sparkles className="w-12 h-12 text-brand-gold mx-auto mb-6" />
+          <h2 className="font-display text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+            Prêt pour votre transformation ?
           </h2>
-          <p className="text-brand-muted text-sm mb-6">
-            Notre équipe est disponible pour vous guider vers le service le
-            mieux adapté à vos cheveux.
+          <p className="text-brand-muted max-w-xl mx-auto mb-10 text-sm md:text-base leading-relaxed">
+            Réservez en quelques clics le service qui sublimera votre style. 
+            Besoin d&apos;assistance ? Notre équipe est là pour vous conseiller.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/contact" className="btn-outline">
-              Nous contacter
-            </Link>
-            <Link href="/booking" className="btn-primary">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/booking" className="px-8 py-4 rounded-2xl bg-brand-gold text-brand-black font-bold hover:bg-white transition-all transform hover:-translate-y-1 shadow-lg shadow-brand-gold/10">
               Prendre rendez-vous
             </Link>
+            <Link href="/contact" className="px-8 py-4 rounded-2xl border border-brand-charcoal text-brand-beige font-bold hover:bg-brand-charcoal/30 transition-all">
+              Nous contacter
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Floating Mobile Nav — Sleek and Minimal */}
+      <div className="fixed bottom-6 left-6 right-6 z-50 lg:hidden pointer-events-none">
+        <div className="max-w-md mx-auto pointer-events-auto">
+          <div className="flex items-center gap-2 p-2 bg-brand-black/80 backdrop-blur-xl border border-brand-gold/20 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.7)] overflow-x-auto no-scrollbar">
+            {CATEGORY_ORDER.map((cat) => {
+              if (!(grouped[cat] || []).length) return null;
+              const Icon = CATEGORY_ICONS[cat] || Sparkles;
+              return (
+                <a 
+                  key={cat}
+                  href={`#${cat}`}
+                  className="p-3 rounded-xl bg-brand-charcoal/40 border border-transparent hover:border-brand-gold/30 hover:bg-brand-gold/10 transition-all shrink-0"
+                >
+                  <Icon className="w-5 h-5 text-brand-gold" />
+                </a>
+              );
+            })}
           </div>
         </div>
       </div>
     </div>
   );
 }
-

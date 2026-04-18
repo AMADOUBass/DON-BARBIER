@@ -82,8 +82,8 @@ const jsonLd = {
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "2880 Av. Duval",
-    "addressLocality": "Qu\u00e9bec",
-    "addressRegion": "QC",
+    "addressLocality": "Quebec",
+    "addressRegion": "Quebec",
     "postalCode": "G1L 4N3",
     "addressCountry": "CA"
   },

@@ -34,7 +34,16 @@ export default async function AccountPage() {
   const { appointments, orders } = await getUserData(session.user.id);
 
   // Fetch missing info from DB since it's not all in the session
-  const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { phone: true, loyaltyPoints: true } });
+  const dbUser = await prisma.user.findUnique({ 
+    where: { id: session.user.id }, 
+    select: { 
+      phone: true, 
+      loyaltyPoints: true,
+      membershipTier: true,
+      coupesUsed: true,
+      lastResetDate: true
+    } 
+  });
 
   const serialized = {
     userId: session.user.id,
@@ -44,6 +53,8 @@ export default async function AccountPage() {
       image: session.user.image ?? null,
       role: session.user.role,
       isMember: session.user.isMember,
+      membershipTier: dbUser?.membershipTier ?? "NONE",
+      coupesUsed: dbUser?.coupesUsed ?? 0,
       phone: dbUser?.phone ?? null,
       loyaltyPoints: dbUser?.loyaltyPoints ?? 0,
     },

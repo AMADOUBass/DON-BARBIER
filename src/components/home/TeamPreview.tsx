@@ -27,20 +27,20 @@ export function TeamPreview() {
         } else {
           // Fallback to real team data provided
           setStylists([
-            { id: "1", user: { name: "Elvis 'Don' Berwa", image: null }, bio: "CEO & Fondateur", yearsExp: 15, specialties: ["Signature_Fade", "Barbe", "Luxe"] },
-            { id: "2", user: { name: "QueenG (Grace)", image: null }, bio: "Experte Styling", yearsExp: 8, specialties: ["Tresses", "Soins_Afro"] },
-            { id: "3", user: { name: "Wed Barber", image: null }, bio: "Maître Barbier", yearsExp: 10, specialties: ["Dégradés", "Contours"] },
-            { id: "4", user: { name: "Henock", image: null }, bio: "Grooming Expert", yearsExp: 6, specialties: ["Barbe", "Coupe_Classique"] },
-            { id: "5", user: { name: "BeriCutzz", image: null }, bio: "Style Moderne", yearsExp: 5, specialties: ["Freestyle", "Fade"] },
+            { id: "1", user: { name: "Elvis 'Don' Berwa", image: "/images/team/don.png" }, bio: "CEO & Fondateur", yearsExp: 7, specialties: ["Signature_Fade", "Barbe", "Luxe"] },
+            { id: "2", user: { name: "QueenG (Grace)", image: "/images/team/grace.png" }, bio: "Experte Styling", yearsExp: 8, specialties: ["Tresses", "Soins_Afro"] },
+            { id: "3", user: { name: "Wed Barber", image: "/images/team/wed.png" }, bio: "Maître Barbier", yearsExp: 10, specialties: ["Dégradés", "Contours"] },
+            { id: "4", user: { name: "Henock", image: "/images/team/henock.png" }, bio: "Grooming Expert", yearsExp: 6, specialties: ["Barbe", "Coupe_Classique"] },
+            { id: "5", user: { name: "BeriCutzz", image: "/images/team/beri.png" }, bio: "Style Moderne", yearsExp: 5, specialties: ["Freestyle", "Fade"] },
           ]);
         }
         setLoading(false);
       })
       .catch(() => {
         setStylists([
-          { id: "1", user: { name: "Elvis 'Don' Berwa", image: null }, bio: "CEO & Fondateur", yearsExp: 15, specialties: ["Signature_Fade", "Barbe", "Luxe"] },
-          { id: "2", user: { name: "QueenG (Grace)", image: null }, bio: "Experte Styling", yearsExp: 8, specialties: ["Tresses", "Soins_Afro"] },
-          { id: "3", user: { name: "Wed Barber", image: null }, bio: "Maître Barbier", yearsExp: 10, specialties: ["Dégradés", "Contours"] },
+          { id: "1", user: { name: "Elvis 'Don' Berwa", image: "/images/team/don.png" }, bio: "CEO & Fondateur", yearsExp: 7, specialties: ["Signature_Fade", "Barbe", "Luxe"] },
+          { id: "2", user: { name: "QueenG (Grace)", image: "/images/team/grace.png" }, bio: "Experte Styling", yearsExp: 8, specialties: ["Tresses", "Soins_Afro"] },
+          { id: "3", user: { name: "Wed Barber", image: "/images/team/wed.png" }, bio: "Maître Barbier", yearsExp: 10, specialties: ["Dégradés", "Contours"] },
         ]);
         setLoading(false);
       });

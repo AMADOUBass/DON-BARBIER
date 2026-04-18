@@ -83,7 +83,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid data", details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const product = await prisma.product.create({ data: parsed.data });
+  const product = await prisma.product.create({
+    data: {
+      name: parsed.data.name,
+      slug: parsed.data.slug,
+      description: parsed.data.description,
+      price: parsed.data.price,
+      comparePrice: parsed.data.comparePrice,
+      stock: parsed.data.stock,
+      sku: parsed.data.sku,
+      categoryId: parsed.data.categoryId,
+      images: parsed.data.images,
+      isFeatured: parsed.data.isFeatured,
+      isMemberOnly: parsed.data.isMemberOnly,
+      memberPrice: parsed.data.memberPrice,
+    },
+  });
   return NextResponse.json(product, { status: 201 });
 }
 

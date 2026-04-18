@@ -8,7 +8,7 @@ const values = [
   {
     icon: Award,
     title: "Excellence",
-    description: "15+ ans d'expertise en grooming et coiffure afro.",
+    description: "7+ ans d'expertise en grooming et coiffure afro.",
   },
   {
     icon: Heart,
@@ -48,7 +48,7 @@ export function AboutSection() {
           {/* Experience badge */}
           <div className="absolute -top-6 -left-6 bg-brand-gold rounded-2xl p-5 shadow-gold-lg">
             <p className="font-display text-3xl font-bold text-brand-black">
-              15+
+              7+
             </p>
             <p className="text-xs text-brand-black/70 font-medium mt-0.5">
               ans d&apos;expérience

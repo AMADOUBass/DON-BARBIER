@@ -75,7 +75,7 @@ export default function PrivacyPage() {
           <section>
             <h2 className="font-display text-xl font-semibold text-brand-gold mb-3">7. Contact</h2>
             <p>
-              Don Barbier · 2880 Av. Duval, Québec, QC G1L 4N3<br />
+              Don Barbier · 2880 Av. Duval, Quebec, Quebec G1L 4N3<br />
               Email : contact@donbarbier.beauty · Tél : (418) 929-9552
             </p>
           </section>

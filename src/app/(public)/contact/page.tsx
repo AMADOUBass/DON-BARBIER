@@ -4,7 +4,7 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contactez Don Barbier — Salon de coiffure à Québec. 2880 Av. Duval, G1L 4N3.",
+  description: "Contactez Don Barbier — Salon de coiffure à Québec. 2880 Av. Duval, Quebec G1L 4N3.",
 };
 
 const hours = [
@@ -36,7 +36,7 @@ export default function ContactPage() {
                   <div>
                     <p className="font-medium text-brand-beige">Adresse</p>
                     <p className="text-brand-muted text-sm mt-1">
-                      2880 Av. Duval<br />Québec, QC G1L 4N3
+                      2880 Av. Duval<br />Quebec, Quebec G1L 4N3
                     </p>
                     <a
                       href="https://maps.google.com/?q=2880+Av.+Duval+Quebec"

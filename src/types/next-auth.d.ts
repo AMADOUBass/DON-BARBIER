@@ -1,21 +1,22 @@
-import type { Role } from "@prisma/client";
-import "next-auth";
-import "next-auth/jwt";
+import { DefaultSession, DefaultUser } from "next-auth";
+import { Role, MembershipTier } from "@prisma/client";
 
 declare module "next-auth" {
-  interface User {
-    role: Role;
-    isMember: boolean;
-  }
   interface Session {
     user: {
       id: string;
-      email: string;
-      name?: string | null;
-      image?: string | null;
       role: Role;
       isMember: boolean;
-    };
+      membershipTier: MembershipTier;
+      coupesUsed: number;
+    } & DefaultSession["user"];
+  }
+
+  interface User extends DefaultUser {
+    role: Role;
+    isMember: boolean;
+    membershipTier: MembershipTier;
+    coupesUsed: number;
   }
 }
 
@@ -24,6 +25,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: Role;
     isMember: boolean;
+    membershipTier: MembershipTier;
+    coupesUsed: number;
   }
 }
-

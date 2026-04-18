@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { ArrowLeft, CreditCard, Calendar, User, Scissors, Clock, AlertCircle } from "lucide-react";
+import { ArrowLeft, CreditCard, Calendar, User, Scissors, Clock, AlertCircle, MapPin, CheckCircle2, Crown } from "lucide-react";
 import { formatPrice, calculateDeposit } from "@/lib/utils";
 import type { BookingState } from "./BookingWizard";
 import toast from "react-hot-toast";
@@ -22,9 +22,15 @@ export function StepConfirm({ booking, onBack }: Props) {
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"CARD" | "INTERAC">("CARD");
 
+  const isHaircut = ["fade-classique", "buzz-cut", "caesar-cut", "side-part", "drop-fade", "burst-fade", "bald-fade"].includes(booking.serviceId) || booking.serviceName.toLowerCase().includes("fade");
+  const hasCredits = session?.user && (session.user as any).membershipTier !== "NONE" && isHaircut && (session.user as any).coupesUsed < 4;
+  const isPrestige = (session?.user as any)?.membershipTier === "PRESTIGE";
+  
+  const [prestationAddress, setPrestationAddress] = useState("");
+
   const totalCents = Math.round(booking.servicePrice * 100);
-  const depositCents = calculateDeposit(totalCents, booking.depositPct);
-  const remainingCents = totalCents - depositCents;
+  const depositCents = hasCredits ? 0 : calculateDeposit(totalCents, booking.depositPct);
+  const remainingCents = hasCredits ? 0 : totalCents - depositCents;
 
   const handleCheckout = async () => {
     if (!session) {
@@ -43,7 +49,7 @@ export function StepConfirm({ booking, onBack }: Props) {
           scheduledAt: new Date(
             `${format(booking.date!, "yyyy-MM-dd")}T${booking.timeSlot}:00`
           ).toISOString(),
-          notes: booking.notes,
+          notes: booking.notes + (prestationAddress ? `\nADRESSE DE PRESTATION: ${prestationAddress}` : ""),
           paymentMethod,
         }),
       });
@@ -117,18 +123,52 @@ export function StepConfirm({ booking, onBack }: Props) {
         </div>
       </div>
 
-      {/* Deposit notice */}
-      <div className="flex gap-3 p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl">
-        <AlertCircle className="w-5 h-5 text-brand-gold flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-brand-muted">
-          <p className="text-brand-beige font-medium mb-1">Dépôt de réservation</p>
-          <p>
-            Un dépôt de <strong className="text-brand-gold">{formatPrice(depositCents / 100)}</strong> est
-            requis pour confirmer votre rendez-vous. Ce montant sera déduit de votre facture finale.
-            En cas d&apos;annulation moins de 24h avant le rendez-vous, le dépôt ne sera pas remboursé.
+      {/* Prestige Address Field */}
+      {isPrestige && (
+        <div className="card border-brand-gold/40 bg-brand-gold/5">
+          <h3 className="font-semibold text-brand-gold mb-3 flex items-center gap-2">
+            <MapPin className="w-4 h-4" /> Adresse de prestation (Forfait Prestige)
+          </h3>
+          <p className="text-xs text-brand-muted mb-4 uppercase tracking-wider">
+            Votre barbier se déplace. Veuillez confirmer l&apos;adresse exacte.
           </p>
+          <input
+            type="text"
+            className="input"
+            placeholder="Ex: 2880 Av. Duval, Quebec, Quebec G1L 4N3"
+            value={prestationAddress}
+            onChange={(e) => setPrestationAddress(e.target.value)}
+          />
         </div>
-      </div>
+      )}
+
+      {/* Deposit notice */}
+      {!hasCredits && (
+        <div className="flex gap-3 p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl">
+          <AlertCircle className="w-5 h-5 text-brand-gold flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-brand-muted">
+            <p className="text-brand-beige font-medium mb-1">Dépôt de réservation</p>
+            <p>
+              Un dépôt de <strong className="text-brand-gold">{formatPrice(depositCents / 100)}</strong> est
+              requis pour confirmer votre rendez-vous. Ce montant sera déduit de votre facture finale.
+              En cas d&apos;annulation moins de 24h avant le rendez-vous, le dépôt ne sera pas remboursé.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {hasCredits && (
+        <div className="flex gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-xl">
+          <CheckCircle2 className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-brand-muted">
+            <p className="text-green-400 font-medium mb-1">Avantage Club Privé</p>
+            <p>
+              Votre forfait <strong className="text-brand-gold">{(session?.user as any)?.membershipTier}</strong> inclut cette prestation. 
+              <strong className="text-brand-gold"> Aucun dépôt requis.</strong> La réservation sera confirmée instantanément.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Auth notice */}
       {status === "unauthenticated" && (
@@ -150,41 +190,49 @@ export function StepConfirm({ booking, onBack }: Props) {
       {/* Payment Method Selection */}
       <div className="space-y-4">
         <label className="text-sm font-medium text-brand-muted uppercase tracking-wider">
-          Mode de paiement du dépôt
+          Mode de paiement {hasCredits ? "(Non requis)" : "du dépôt"}
         </label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <button
-            onClick={() => setPaymentMethod("CARD")}
-            className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
-              paymentMethod === "CARD"
-                ? "border-brand-gold bg-brand-gold/10"
-                : "border-white/5 bg-brand-black/40 hover:border-brand-gold/20"
-            }`}
-          >
-            <CreditCard className={`w-8 h-8 ${paymentMethod === "CARD" ? "text-brand-gold" : "text-brand-muted"}`} />
-            <div className="text-center">
-              <p className="font-semibold text-brand-beige">Carte de crédit</p>
-              <p className="text-[10px] text-brand-muted mt-1 uppercase">Stripe sécurisé</p>
-            </div>
-          </button>
+        {!hasCredits ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              onClick={() => setPaymentMethod("CARD")}
+              className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                paymentMethod === "CARD"
+                  ? "border-brand-gold bg-brand-gold/10"
+                  : "border-white/5 bg-brand-black/40 hover:border-brand-gold/20"
+              }`}
+            >
+              <CreditCard className={`w-8 h-8 ${paymentMethod === "CARD" ? "text-brand-gold" : "text-brand-muted"}`} />
+              <div className="text-center">
+                <p className="font-semibold text-brand-beige">Carte de crédit</p>
+                <p className="text-[10px] text-brand-muted mt-1 uppercase">Stripe sécurisé</p>
+              </div>
+            </button>
 
-          <button
-            onClick={() => setPaymentMethod("INTERAC")}
-            className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
-              paymentMethod === "INTERAC"
-                ? "border-brand-gold bg-brand-gold/10"
-                : "border-white/5 bg-brand-black/40 hover:border-brand-gold/20"
-            }`}
-          >
-            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold font-bold text-xs">
-              $
-            </div>
-            <div className="text-center">
-                <p className="font-semibold text-brand-beige">Virement Interac</p>
-                <p className="text-[10px] text-brand-muted mt-1 uppercase">(581) 745-7409</p>
-            </div>
-          </button>
-        </div>
+            <button
+              onClick={() => setPaymentMethod("INTERAC")}
+              className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all text-left ${
+                paymentMethod === "INTERAC"
+                  ? "border-brand-gold bg-brand-gold/10"
+                  : "border-white/5 bg-brand-black/40 hover:border-brand-gold/20"
+              }`}
+            >
+              <div className="w-8 h-8 flex items-center justify-center rounded-full bg-brand-gold/10 text-brand-gold font-bold text-xs">
+                $
+              </div>
+              <div className="text-center">
+                  <p className="font-semibold text-brand-beige">Virement Interac</p>
+                  <p className="text-[10px] text-brand-muted mt-1 uppercase">(418) 929-9552</p>
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div className="p-6 rounded-xl border-2 border-dashed border-brand-gold/20 bg-brand-gold/5 flex flex-col items-center justify-center text-center">
+            <Crown className="w-8 h-8 text-brand-gold mb-3" />
+            <p className="text-brand-beige font-medium">Inclus dans votre forfait Club Privé</p>
+            <p className="text-[10px] text-brand-muted uppercase mt-1 tracking-widest">Confirmez simplement ci-dessous</p>
+          </div>
+        )}
 
         {paymentMethod === "INTERAC" && (
           <motion.div
@@ -193,7 +241,7 @@ export function StepConfirm({ booking, onBack }: Props) {
             className="p-4 bg-brand-gold/5 border border-brand-gold/20 rounded-xl"
           >
             <p className="text-xs text-brand-muted leading-relaxed">
-              <strong className="text-brand-gold">Instructions :</strong> Veuillez envoyer votre dépôt de <strong className="text-brand-beige">{formatPrice(depositCents / 100)}</strong> par virement Interac au numéro <strong className="text-brand-beige">(581) 745-7409</strong> (recommandé) ou à <strong className="text-brand-beige">Don Barbierf@gmail.com</strong>. Votre rendez-vous sera validé dès réception.
+              <strong className="text-brand-gold">Instructions :</strong> Veuillez envoyer votre dépôt de <strong className="text-brand-beige">{formatPrice(depositCents / 100)}</strong> par virement Interac au numéro <strong className="text-brand-beige">(418) 929-9552</strong> ou à <strong className="text-brand-beige">donbarbier@gmail.com</strong>. Votre rendez-vous sera validé dès réception.
             </p>
           </motion.div>
         )}
@@ -211,12 +259,12 @@ export function StepConfirm({ booking, onBack }: Props) {
           {loading ? (
             <span className="inline-flex items-center gap-2">
               <span className="w-4 h-4 border-2 border-brand-black/30 border-t-brand-black rounded-full animate-spin" />
-              Chargement...
+              Confirmation...
             </span>
           ) : (
             <>
-              <CreditCard className="w-4 h-4" />
-              Payer le dépôt — {formatPrice(depositCents / 100)}
+              {hasCredits ? <Crown className="w-4 h-4" /> : <CreditCard className="w-4 h-4" />}
+              {hasCredits ? "Confirmer avec mes crédits" : `Payer le dépôt — ${formatPrice(depositCents / 100)}`}
             </>
           )}
         </button>

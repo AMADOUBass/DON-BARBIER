@@ -1,8 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, Instagram, Facebook } from "lucide-react";
 
 const footerLinks = {
   services: [
+    { label: "Club Privé", href: "/club" },
     { label: "Réserver un rendez-vous", href: "/booking" },
     { label: "Nos services", href: "/#services" },
     { label: "L'équipe", href: "/team" },
@@ -29,8 +31,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <Link href="/" className="font-display text-3xl font-bold text-brand-gold">
-              Le Don Barbier
+            <Link href="/" className="relative block w-20 h-20 mb-4 transition-transform duration-300 hover:scale-110">
+              <Image
+                src="/logo-db.png"
+                alt="Le Don Barbier Logo"
+                fill
+                className="object-contain"
+              />
             </Link>
             <p className="mt-4 text-brand-muted text-sm leading-relaxed max-w-xs">
               Barbershop premium fondé par Elvis &quot;Don&quot; Berwa. L&quot;excellence du grooming et de la coiffure
@@ -44,7 +51,7 @@ export function Footer() {
                 className="flex items-start gap-3 text-sm text-brand-muted hover:text-brand-gold transition-colors"
               >
                 <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-brand-gold" />
-                2880 Av. Duval, Québec, QC G1L 4N3
+                2880 Av. Duval, Quebec, Quebec G1L 4N3
               </a>
               <a
                 href="tel:+14189299552"

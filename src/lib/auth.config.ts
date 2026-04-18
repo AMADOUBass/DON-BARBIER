@@ -1,5 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
-import type { Role } from "@prisma/client";
+import type { Role, MembershipTier } from "@prisma/client";
 
 // Edge-compatible config — NO Node.js modules (no bcrypt, no PrismaAdapter)
 // Used by middleware to verify JWT without importing server-only code
@@ -13,11 +13,12 @@ export const authConfig = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.id = (user as { id?: string }).id ?? "";
-        token.role = (user as { role: Role }).role;
-        token.isMember = (user as { isMember: boolean }).isMember;
-        token.picture =
-          (user as { image?: string | null }).image ?? token.picture;
+        token.id = user.id ?? "";
+        token.role = user.role;
+        token.isMember = user.isMember;
+        token.membershipTier = user.membershipTier;
+        token.coupesUsed = user.coupesUsed;
+        token.picture = user.image ?? token.picture;
       }
       if (trigger === "update" && session?.image) {
         token.picture = session.image;
@@ -29,6 +30,8 @@ export const authConfig = {
         session.user.id = token.id as string;
         session.user.role = token.role as Role;
         session.user.isMember = token.isMember as boolean;
+        session.user.membershipTier = token.membershipTier as MembershipTier;
+        session.user.coupesUsed = token.coupesUsed as number;
         if (token.picture) session.user.image = token.picture;
       }
       return session;

@@ -24,6 +24,7 @@ type EmailTemplate =
   | "appointment_reminder"
   | "order_shipped"
   | "welcome"
+  | "welcome_club"
   | "reset_password"
   | "google_signin_reminder";
 
@@ -39,7 +40,7 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0A0A0A;color:#F5EDD6;padding:40px;border-radius:12px;">
         <h1 style="color:#C9A84C;font-size:24px;margin-bottom:8px;">Don Barbier</h1>
-        <p style="color:#6B6B6B;font-size:12px;margin-bottom:32px;">Salon spécialisé en locs et coiffures afro</p>
+        <p style="color:#6B6B6B;font-size:12px;margin-bottom:32px;">L'excellence du grooming et de la coiffure afro à Québec</p>
         <h2 style="font-size:20px;">Dépôt reçu — Confirmation en cours</h2>
         <p>Bonjour <strong>${d.clientName}</strong>,</p>
         <p>Nous avons bien reçu votre dépôt de <strong>${d.depositAmount} CAD</strong> pour votre rendez-vous.</p>
@@ -51,7 +52,7 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
         </div>
         <p>Notre équipe va confirmer votre rendez-vous sous peu. Vous recevrez un email de confirmation.</p>
         <hr style="border-color:#333;margin:32px 0;">
-        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Québec, QC G1L 4N3 · (418) 929-9552</p>
+        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Quebec, Quebec G1L 4N3 · (418) 929-9552</p>
       </div>
     `,
   }),
@@ -85,7 +86,7 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
 
         <p style="margin-top:24px;">Une fois le virement reçu, vous recevrez un email de confirmation finale.</p>
         <hr style="border-color:#333;margin:32px 0;">
-        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Québec, QC G1L 4N3</p>
+        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Quebec, Quebec G1L 4N3</p>
       </div>
     `,
   }),
@@ -100,9 +101,9 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
         <div style="background:#1A1A1A;border:1px solid #C9A84C33;border-radius:8px;padding:20px;margin:24px 0;">
           <p><strong>Service :</strong> ${d.serviceName}</p>
           <p><strong>Date :</strong> ${d.appointmentDate}</p>
-          <p><strong>Adresse :</strong> 2880 Av. Duval, Québec, QC G1L 4N3</p>
+          <p><strong>Adresse :</strong> 2880 Av. Duval, Quebec, Quebec G1L 4N3</p>
         </div>
-        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Québec, QC G1L 4N3 · (418) 929-9552</p>
+        <p style="font-size:12px;color:#6B6B6B;">2880 Av. Duval, Quebec, Quebec G1L 4N3 · (418) 929-9552</p>
       </div>
     `,
   }),
@@ -197,7 +198,7 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
         <div style="background:#1A1A1A;padding:24px;border-radius:8px;margin:24px 0;text-align:center;">
           <p style="margin:0 0 16px 0;">Il semble que vous vous connectez habituellement à Don Barbier via <strong>Google</strong>.</p>
           <a href="${process.env.NEXT_PUBLIC_APP_URL}/login" style="display:inline-block;background:#C9A84C;color:#0A0A0A;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;">
-            Se connecter avec Google
+            Se connecter with Google
           </a>
         </div>
         <p style="color:#6B6B6B;font-size:13px;line-height:1.5;">
@@ -205,6 +206,26 @@ const templates: Record<EmailTemplate, (data: Record<string, string | number>) =
         </p>
         <hr style="border-color:#333;margin:32px 0;">
         <p style="font-size:12px;color:#6B6B6B;">Ceci est un message automatique de protection de compte.</p>
+      </div>
+    `,
+  }),
+  welcome_club: (d) => ({
+    subject: "Bienvenue dans le Club Privé Don Barbier 🏆",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:0 auto;background:#0A0A0A;color:#F5EDD6;padding:40px;border-radius:12px;border:1px solid #C9A84C33;">
+        <h1 style="color:#C9A84C;font-size:24px;margin-bottom:8px;">Don Barbier</h1>
+        <h2 style="font-size:20px;">Félicitations pour votre adhésion !</h2>
+        <p>Bonjour <strong>${d.clientName}</strong>,</p>
+        <p>Vous faites maintenant partie du Club Privé en tant que membre <strong>${d.tierName}</strong>.</p>
+        <div style="background:#1A1A1A;padding:24px;border-radius:8px;margin:24px 0;">
+          <p style="margin:0;">Vos avantages sont désormais actifs sur votre compte.</p>
+          <p style="margin:8px 0 0 0;">Vous disposez de <strong>4 coupes</strong> à utiliser ce mois-ci.</p>
+        </div>
+        <a href="${process.env.NEXT_PUBLIC_APP_URL}/booking" style="display:inline-block;background:#C9A84C;color:#0A0A0A;padding:14px 28px;border-radius:6px;text-decoration:none;font-weight:bold;">
+          Réserver ma première coupe
+        </a>
+        <hr style="border-color:#333;margin:32px 0;">
+        <p style="font-size:12px;color:#6B6B6B;">À très bientôt au salon,<br>L'équipe Don Barbier</p>
       </div>
     `,
   }),

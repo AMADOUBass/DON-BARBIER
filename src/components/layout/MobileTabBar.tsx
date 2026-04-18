@@ -17,6 +17,7 @@ const tabs = [
 ];
 
 const menuLinks = [
+  { href: "/club", label: "Club Privé", description: "Avantages et forfaits exclusifs" },
   { href: "/gallery", label: "Galerie", description: "Découvrez nos réalisations" },
   { href: "/team", label: "L'équipe", description: "Faites connaissance avec nos stylistes" },
   { href: "/faq", label: "FAQ", description: "Réponses à vos questions" },
