@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+export const dynamic = "force-dynamic";
 import { Suspense } from "react";
 import { ShopGrid } from "@/components/shop/ShopGrid";
 import { ShopFilters } from "@/components/shop/ShopFilters";

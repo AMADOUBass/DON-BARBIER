@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { GalleryGrid } from "@/components/gallery/GalleryGrid";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Galerie | Don Barbier",
   description: "Découvrez l'excellence du grooming chez Le Don Barbier : dégradés de précision, soin des locs et coiffures afro haut de gamme à Québec.",

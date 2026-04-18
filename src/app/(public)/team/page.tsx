@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { Calendar } from "lucide-react";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "L'Équipe | Le Don Barbier",
   description: "Rencontrez l'élite du grooming afro à Québec. Nos experts en dégradés, barbes et soins capillaires vous accueillent chez Le Don Barbier.",
