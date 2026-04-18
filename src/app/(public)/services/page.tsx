@@ -13,14 +13,17 @@ export const metadata: Metadata = {
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
+  classic: "Coupes Classiques",
+  trending: "Coupes Tendances",
+  fade: "Dégradés Spécialisés",
+  design: "Design & Finitions",
+  barbe: "Barbe & Rasage",
   locks: "Locs & Retwist",
-  braids: "Tresses",
-  natural: "Styles naturels",
-  treatment: "Soins capillaires",
-  other: "Autres services",
+  braids: "Tresses & Nattes",
+  extra: "Extras & Soins",
 };
 
-const CATEGORY_ORDER = ["locks", "braids", "natural", "treatment", "other"];
+const CATEGORY_ORDER = ["classic", "trending", "fade", "design", "barbe", "locks", "braids", "extra"];
 
 export default async function ServicesPage() {
   const services = await prisma.service.findMany({
@@ -57,24 +60,38 @@ export default async function ServicesPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <ScrollReveal>
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <p className="text-brand-gold text-sm font-medium uppercase tracking-widest mb-3">
-              Expertise capillaire
+              Expertise Barbier & Afro
             </p>
             <h1 className="section-title">Nos Services</h1>
             <div className="divider-gold" />
             <p className="text-brand-muted max-w-xl mx-auto mt-4 text-sm leading-relaxed">
-              Des soins capillaires soigneusement élaborés pour sublimer votre
-              beauté naturelle. Chaque service est réalisé avec passion et
-              expertise.
+              Une gamme complète de soins pour l&apos;homme moderne et l&apos;entretien des textures naturelles. 
+              Précision, style et bien-être à chaque rendez-vous.
             </p>
           </div>
         </ScrollReveal>
 
+        {/* Quick Nav */}
+        <div className="sticky top-20 z-30 mb-12 py-4 -mx-4 px-4 bg-brand-black/90 backdrop-blur-md border-y border-brand-gold/10 overflow-x-auto no-scrollbar hidden sm:flex justify-center">
+          <div className="flex gap-2">
+            {Object.entries(grouped).map(([cat, items]) => (
+              <a 
+                key={cat} 
+                href={`#${cat}`}
+                className="px-4 py-2 rounded-full text-xs font-medium border border-brand-charcoal text-brand-muted hover:border-brand-gold hover:text-brand-gold transition-all whitespace-nowrap"
+              >
+                {CATEGORY_LABELS[cat] ?? cat} ({items.length})
+              </a>
+            ))}
+          </div>
+        </div>
+
         {/* Category groups */}
         <div className="space-y-16">
           {Object.entries(grouped).map(([cat, items]) => (
-            <section key={cat}>
+            <section key={cat} id={cat} className="scroll-mt-32">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-8 h-8 bg-brand-gold/10 border border-brand-gold/20 rounded-lg flex items-center justify-center">
                   <Scissors className="w-4 h-4 text-brand-gold" />

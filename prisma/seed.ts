@@ -65,18 +65,82 @@ async function main() {
 
   for (const s of [sDon, sGrace, sWed, sHenock, sBeri]) { for (let d=1; d<=6; d++) await prisma.availability.create({ data: { stylistId: s.id, dayOfWeek: d, startTime: "09:00", endTime: "19:00" } }); }
 
-  // 4. Services (Réalistes Afro & Mixte)
-  const ser1 = await prisma.service.create({ data: { name: "Coupe Signature Don Luxe", slug: "signature-don-luxe", durationMins: 90, basePrice: 65, imageUrl: "/images/services/fade-luxury.png", category: "Grooming", description: "L'expérience premium complète : Coupe de précision, soin de barbe, serviette chaude et massage du cuir chevelu." } });
-  const ser2 = await prisma.service.create({ data: { name: "Skin Fade (Dégradé à blanc)", slug: "skin-fade", durationMins: 60, basePrice: 45, imageUrl: "/images/services/fade-white.png", category: "Grooming", description: "Travail de dégradé millimétré à la tondeuse et au rasoir. Finitions impeccables." } });
-  const ser3 = await prisma.service.create({ data: { name: "Starter Locs (Installation)", slug: "starter-locs", durationMins: 240, basePrice: 200, imageUrl: "/images/services/starter-locs.png", category: "Locs", description: "Installation professionnelle de vos locs. Consultation incluse pour choisir la méthode adaptée." } });
-  const ser4 = await prisma.service.create({ data: { name: "Retwist & Soin Hydratant", slug: "retwist-soin", durationMins: 120, basePrice: 120, imageUrl: "/images/services/retwist.png", category: "Locs", description: "Entretien de vos locs avec soin profond et styling optionnel pour une tenue parfaite." } });
-  const ser5 = await prisma.service.create({ data: { name: "Tresses & Cornrows (Tête complète)", slug: "tresses-rows", durationMins: 180, basePrice: 100, imageUrl: "/images/services/braids.png", category: "Tresses", description: "Design géométrique et tresses protectrices nettes pour un style durable." } });
-  const ser6 = await prisma.service.create({ data: { name: "Wash & Go / Définition de boucles", slug: "wash-go", durationMins: 45, basePrice: 45, imageUrl: "/images/services/natural.png", category: "Mixte", description: "Soin lavant et définition des boucles naturelles pour toutes les textures." } });
-  const ser7 = await prisma.service.create({ data: { name: "Traitement Vapeur Hydratation", slug: "steam-treatment", durationMins: 60, basePrice: 50, imageUrl: "/images/services/treatment.png", category: "Soin", description: "Soin à la vapeur pour ouvrir les pores et faire pénétrer les nutriments en profondeur." } });
+  // 4. Services (Catalogue Complet Barbier & Afro)
+  const sList = [
+    // --- CLASSIQUES ---
+    { name: "Fade Classique", slug: "fade-classique", durationMins: 45, basePrice: 40, category: "classic", imageUrl: "/images/services/classic-cut.png", description: "Dégradé progressif aux finitions précises. Le standard de l'élégance." },
+    { name: "Buzz Cut", slug: "buzz-cut", durationMins: 20, basePrice: 25, category: "classic", imageUrl: "/images/services/classic-cut.png", description: "Coupe courte uniforme à la tondeuse. Simple, propre, efficace." },
+    { name: "Caesar Cut", slug: "caesar-cut", durationMins: 30, basePrice: 35, category: "classic", imageUrl: "/images/services/classic-cut.png", description: "Coupe courte avec frange horizontale courte. Un classique indémodable." },
+    { name: "Side Part", slug: "side-part", durationMins: 35, basePrice: 35, category: "classic", imageUrl: "/images/services/classic-cut.png", description: "Coupe avec raie sur le côté pour un look structuré et professionnel." },
 
-  for (const s of [ser1, ser2, ser6]) await prisma.stylistService.create({ data: { stylistId: sDon.id, serviceId: s.id } });
-  await prisma.stylistService.create({ data: { stylistId: sGrace.id, serviceId: ser5.id } });
-  await prisma.stylistService.create({ data: { stylistId: sWed.id, serviceId: ser2.id } });
+    // --- TENDANCES ---
+    { name: "Pompadour Moderne", slug: "pompadour", durationMins: 50, basePrice: 45, category: "trending", imageUrl: "/images/services/trending-style.png", description: "Volume sur le dessus et côtés courts. Pour un style audacieux et sophistiqué." },
+    { name: "Undercut", slug: "undercut", durationMins: 45, basePrice: 40, category: "trending", imageUrl: "/images/services/trending-style.png", description: "Contraste marqué entre les côtés très courts et la longueur sur le dessus." },
+    { name: "French Crop", slug: "french-crop", durationMins: 40, basePrice: 40, category: "trending", imageUrl: "/images/services/trending-style.png", description: "Coupe texturée avec frange courte vers l'avant. Très facile à coiffer." },
+    { name: "Mullet Moderne", slug: "mullet-moderne", durationMins: 60, basePrice: 50, category: "trending", imageUrl: "/images/services/trending-style.png", description: "Le retour du classique avec une touche dégradée moderne et travaillée." },
+
+    // --- DÉGRADÉS SPÉCIALISÉS ---
+    { name: "Drop Fade", slug: "drop-fade", durationMins: 60, basePrice: 50, category: "fade", imageUrl: "/images/services/specialized-fade.png", description: "Dégradé qui descend derrière l'oreille pour épouser la forme du crâne." },
+    { name: "Burst Fade", slug: "burst-fade", durationMins: 60, basePrice: 55, category: "fade", imageUrl: "/images/services/specialized-fade.png", description: "Dégradé en arrondi autour de l'oreille, idéal pour les styles mohawk ou afro." },
+    { name: "Bald Fade (À blanc)", slug: "bald-fade", durationMins: 60, basePrice: 50, category: "fade", imageUrl: "/images/services/specialized-fade.png", description: "Dégradé commençant à la peau pour un contraste maximal et une netteté totale." },
+
+    // --- DESIGN & FINITIONS ---
+    { name: "Line-Up Précision", slug: "line-up", durationMins: 15, basePrice: 15, category: "design", imageUrl: "/images/services/design-art.png", description: "Redessiner les contours du front et des tempes au rasoir. Netteté chirurgicale." },
+    { name: "Hair Tattoo / Design", slug: "hair-tattoo", durationMins: 30, basePrice: 30, category: "design", imageUrl: "/images/services/design-art.png", description: "Motifs artistiques gravés dans la chevelure. Selon complexité." },
+    { name: "Hard Part (Raie tracée)", slug: "hard-part", durationMins: 10, basePrice: 10, category: "design", imageUrl: "/images/services/design-art.png", description: "Tracé de la raie au rasoir pour accentuer la structure de la coupe." },
+
+    // --- SERVICES BARBE ---
+    { name: "Taille de Barbe Sculptée", slug: "taille-barbe", durationMins: 30, basePrice: 30, category: "barbe", imageUrl: "/images/services/beard-grooming.png", description: "Mise en forme, égalisation et hydratation de la barbe aux huiles premium." },
+    { name: "Rasage à Chaud Traditionnel", slug: "rasage-chaud", durationMins: 45, basePrice: 45, category: "barbe", imageUrl: "/images/services/beard-grooming.png", description: "Expérience relaxante avec serviette chaude, mousse onctueuse et rasage au coupe-chou." },
+    { name: "Combo Coupe + Barbe Luxe", slug: "combo-luxe", durationMins: 75, basePrice: 65, category: "barbe", imageUrl: "/images/services/beard-grooming.png", description: "Le service complet : Coupe Signature et Soin de barbe complet." },
+
+    // --- LOCS (Expertise Afro) ---
+    { name: "Retwist & Soin Profond", slug: "locs-retwist", durationMins: 120, basePrice: 100, category: "locks", imageUrl: "/images/services/retwist.png", description: "Entretien de vos locs avec nettoyage et resserrage des racines." },
+    { name: "Starter Locs", slug: "starter-locs", durationMins: 240, basePrice: 200, category: "locks", imageUrl: "/images/services/starter-locs.png", description: "Installation professionnelle de vos premières locs. Consultation incluse." },
+
+    // --- TRESSES ---
+    { name: "Cornrows (Tresses collées)", slug: "cornrows", durationMins: 120, basePrice: 80, category: "braids", imageUrl: "/images/services/braids.png", description: "Tresses protectrices nettes avec designs géométriques variés." },
+    { name: "Box Braids / Nattes", slug: "box-braids", durationMins: 240, basePrice: 150, category: "braids", imageUrl: "/images/services/braids.png", description: "Nattes individuelles protectrices pour une tenue longue durée." },
+
+    // --- EXTRAS ---
+    { name: "Shampoing & Massage", slug: "shampoing-extras", durationMins: 15, basePrice: 15, category: "extra", imageUrl: "/images/services/extras-grooming.png", description: "Nettoyage en profondeur et massage relaxant du cuir chevelu." },
+    { name: "Coloration Homme", slug: "coloration-extra", durationMins: 60, basePrice: 45, category: "extra", imageUrl: "/images/services/extras-grooming.png", description: "Couverture des cheveux gris ou changement de style. Prix selon longueur." },
+  ];
+
+  const dbServices = [];
+  for (const s of sList) {
+    const created = await prisma.service.create({ data: s });
+    dbServices.push(created);
+  }
+
+  // Helper function to find a service by slug
+  const getS = (slug: string) => dbServices.find(s => s.slug === slug)!;
+
+  // 5. Liaisons Stylistes - Services
+  // Don (Expertise Master)
+  for (const slug of ["fade-classique", "combo-luxe", "shampoing-extras"]) {
+    await prisma.stylistService.create({ data: { stylistId: sDon.id, serviceId: getS(slug).id } });
+  }
+
+  // Grace (Expertise Tresses & Locs)
+  for (const slug of ["cornrows", "box-braids", "locs-retwist"]) {
+    await prisma.stylistService.create({ data: { stylistId: sGrace.id, serviceId: getS(slug).id } });
+  }
+
+  // Wed (Expertise Dégradés & Contours)
+  for (const slug of ["bald-fade", "burst-fade", "line-up"]) {
+    await prisma.stylistService.create({ data: { stylistId: sWed.id, serviceId: getS(slug).id } });
+  }
+
+  // Henock (Expertise Barbe)
+  for (const slug of ["taille-barbe", "rasage-chaud"]) {
+    await prisma.stylistService.create({ data: { stylistId: sHenock.id, serviceId: getS(slug).id } });
+  }
+
+  // Beri (Expertise Freestyle & Designs)
+  for (const slug of ["pompadour", "mullet-moderne", "hair-tattoo"]) {
+    await prisma.stylistService.create({ data: { stylistId: sBeri.id, serviceId: getS(slug).id } });
+  }
 
   // 5. Boutique (Produits Premium Don Barbier)
   const catS = await prisma.productCategory.create({ data: { name: "Soins & Barbe", slug: "soins-barbe" } });
@@ -187,7 +251,7 @@ async function main() {
 
   // 7. Données Business (RDV récents)
   for (let i = 0; i < 5; i++) {
-    await prisma.appointment.create({ data: { clientId: cli.id, stylistId: sDon.id, serviceId: ser1.id, scheduledAt: dA(i + 1), durationMins: 75, totalPrice: 45, depositAmount: 15, depositPct: 30, status: "COMPLETED" } });
+    await prisma.appointment.create({ data: { clientId: cli.id, stylistId: sDon.id, serviceId: getS("combo-luxe").id, scheduledAt: dA(i + 1), durationMins: 75, totalPrice: 45, depositAmount: 15, depositPct: 30, status: "COMPLETED" } });
   }
 
   console.log("\n🔥  REBRANDING RÉUSSI : Équipe Don Barbier installée et prête !");
