@@ -3,7 +3,7 @@
  * 100% Premium Branding — Afro-centric Excellence.
  */
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Service } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { config } from "dotenv";
@@ -107,7 +107,7 @@ async function main() {
     { name: "Coloration Homme", slug: "coloration-extra", durationMins: 60, basePrice: 45, category: "extra", imageUrl: "/images/services/extras-grooming.png", description: "Couverture des cheveux gris ou changement de style. Prix selon longueur." },
   ];
 
-  const dbServices = [];
+  const dbServices: Service[] = [];
   for (const s of sList) {
     const created = await prisma.service.create({ data: s });
     dbServices.push(created);
