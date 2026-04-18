@@ -7,27 +7,27 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(cuid())
-  email         String        @unique
-  emailVerified DateTime?
-  name          String?
-  phone         String?
-  image         String?
-  passwordHash  String?
-  role          Role          @default(CLIENT)
-  isMember      Boolean       @default(false)
-  memberSince   DateTime?
-  loyaltyPoints Int           @default(0)
-  marketingConsent Boolean      @default(false)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  accounts      Account[]
-  appointments  Appointment[] @relation("ClientAppointments")
-  cartItems     CartItem[]
-  orders        Order[]
-  reviews       Review[]
-  sessions      Session[]
-  stylist       Stylist?
+  id               String        @id @default(cuid())
+  email            String        @unique
+  emailVerified    DateTime?
+  name             String?
+  phone            String?
+  image            String?
+  passwordHash     String?
+  role             Role          @default(CLIENT)
+  isMember         Boolean       @default(false)
+  memberSince      DateTime?
+  loyaltyPoints    Int           @default(0)
+  marketingConsent Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  accounts         Account[]
+  appointments     Appointment[] @relation("ClientAppointments")
+  cartItems        CartItem[]
+  orders           Order[]
+  reviews          Review[]
+  sessions         Session[]
+  stylist          Stylist?
 
   @@map("users")
 }
