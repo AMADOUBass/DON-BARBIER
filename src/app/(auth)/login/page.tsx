@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Eye, EyeOff, LogIn } from "lucide-react";
+import { Eye, EyeOff, LogIn, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 function LoginForm() {
@@ -62,9 +62,17 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20">
       <div className="w-full max-w-md">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-brand-muted hover:text-brand-gold transition-colors mb-12 group"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Retour à l&apos;accueil</span>
+        </Link>
+
         <div className="text-center mb-8">
-          <Link href="/" className="font-display text-3xl font-bold text-brand-gold">
-            Don Barbier
+          <Link href="/" className="font-display text-4xl font-bold text-brand-gold">
+            Le Don Barbier
           </Link>
           <h1 className="mt-4 text-2xl font-semibold text-brand-beige">Connexion</h1>
           <p className="mt-1 text-sm text-brand-muted">

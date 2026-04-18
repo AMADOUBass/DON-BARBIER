@@ -41,46 +41,46 @@ export function CookieConsent() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="fixed bottom-28 sm:bottom-0 left-0 right-0 z-[100] p-4 sm:p-6"
+          className="fixed bottom-24 sm:bottom-6 left-0 right-0 sm:left-auto sm:right-6 z-[100] p-4"
         >
-          <div className="max-w-4xl mx-auto glass border border-brand-gold/20 shadow-gold-lg rounded-2xl overflow-hidden">
-            <div className="p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-brand-gold/10 flex items-center justify-center">
-                <Cookie className="w-6 h-6 text-brand-gold" />
-              </div>
-              
-              <div className="flex-grow text-center md:text-left">
-                <h3 className="text-brand-beige font-display text-xl font-bold mb-2">
+          <div className="max-w-[440px] glass border border-brand-gold/20 shadow-gold-lg rounded-2xl overflow-hidden">
+            <div className="p-5 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-gold/10 flex items-center justify-center">
+                  <Cookie className="w-4 h-4 text-brand-gold" />
+                </div>
+                <h3 className="text-brand-beige font-display text-lg font-bold">
                   Respect de votre vie privée
                 </h3>
-                <p className="text-brand-muted text-sm leading-relaxed">
-                  Nous utilisons des cookies pour améliorer votre expérience, analyser notre trafic et assurer la sécurité de vos transactions. En cliquant sur &quot;Accepter&quot;, vous nous aidez à améliorer Don Barbier. Vous pouvez consulter notre <Link href="/privacy" className="text-brand-gold underline hover:no-underline">Politique de confidentialité</Link> pour plus de détails.
-                </p>
               </div>
+              <p className="text-brand-muted text-[13px] leading-relaxed">
+                Nous utilisons des cookies pour optimiser votre expérience et sécuriser vos transactions. 
+                Consultez notre <Link href="/privacy" className="text-brand-gold underline hover:no-underline">Politique</Link>.
+              </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <div className="flex gap-2">
                 <button
                   onClick={handleDecline}
-                  className="btn-outline px-6 py-2.5 text-sm whitespace-nowrap order-2 sm:order-1"
+                  className="flex-1 btn-outline px-4 py-2 text-xs whitespace-nowrap"
                 >
-                  Continuer sans accepter
+                  Décliner
                 </button>
                 <button
                   onClick={handleAccept}
-                  className="btn-primary px-8 py-2.5 text-sm whitespace-nowrap order-1 sm:order-2"
+                  className="flex-1 btn-primary px-4 py-2 text-xs whitespace-nowrap"
                 >
-                  Tout accepter
+                  Accepter
                 </button>
               </div>
-
-              <button 
-                onClick={() => setShowBanner(false)}
-                className="absolute top-4 right-4 text-brand-muted hover:text-brand-gold transition-colors p-1"
-                aria-label="Fermer"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
+
+            <button 
+              onClick={() => setShowBanner(false)}
+              className="absolute top-4 right-3 text-brand-muted hover:text-brand-gold transition-colors p-1"
+              aria-label="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </motion.div>
       )}

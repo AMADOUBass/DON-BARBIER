@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Eye, EyeOff, UserPlus } from "lucide-react";
+import { Eye, EyeOff, UserPlus, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function SignupPage() {
@@ -77,9 +77,17 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20">
       <div className="w-full max-w-md">
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 text-brand-muted hover:text-brand-gold transition-colors mb-12 group"
+        >
+          <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+          <span>Retour à l&apos;accueil</span>
+        </Link>
+
         <div className="text-center mb-8">
-          <Link href="/" className="font-display text-3xl font-bold text-brand-gold">
-            Don Barbier
+          <Link href="/" className="font-display text-4xl font-bold text-brand-gold">
+            Le Don Barbier
           </Link>
           <h1 className="mt-4 text-2xl font-semibold text-brand-beige">Créer un compte</h1>
           <p className="mt-1 text-sm text-brand-muted">
@@ -149,7 +157,7 @@ export default function SignupPage() {
                 onChange={update("marketingConsent")}
               />
               <label htmlFor="marketingConsent" className="text-xs text-brand-muted cursor-pointer leading-tight">
-                Je souhaite recevoir les conseils capillaires et les offres exclusives de Don Barbier par email.
+                Je souhaite recevoir les conseils capillaires et les offres exclusives de Le Don Barbier par email.
               </label>
             </div>
 
