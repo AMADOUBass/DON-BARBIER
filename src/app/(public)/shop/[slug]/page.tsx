@@ -42,15 +42,17 @@ export default async function ProductPage({ params }: PageProps) {
 
   if (!product) notFound();
 
+  const rawPrice = product.price ? parseFloat(product.price.toString()) : 0;
+  const rawMemberPrice = product.memberPrice ? parseFloat(product.memberPrice.toString()) : null;
+  const displayPrice = isMember && rawMemberPrice ? rawMemberPrice : rawPrice;
+
   const serialized = {
     ...product,
-    price: parseFloat(product.price.toString()),
+    price: rawPrice,
     comparePrice: product.comparePrice ? parseFloat(product.comparePrice.toString()) : null,
-    memberPrice: product.memberPrice ? parseFloat(product.memberPrice.toString()) : null,
-    displayPrice: isMember && product.memberPrice
-      ? parseFloat(product.memberPrice.toString())
-      : parseFloat(product.price.toString()),
-    isMemberDiscount: isMember && !!product.memberPrice,
+    memberPrice: rawMemberPrice,
+    displayPrice: displayPrice,
+    isMemberDiscount: isMember && !!rawMemberPrice,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
     reviews: product.reviews.map((r) => ({

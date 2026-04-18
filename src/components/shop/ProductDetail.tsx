@@ -70,7 +70,7 @@ export function ProductDetail({ product }: { product: Product }) {
       addItem({
         id: product.id,
         name: product.name,
-        price: parseFloat(product.displayPrice.toString()),
+        price: product.displayPrice || 0,
         image: product.images[0] ?? "",
         slug: product.slug,
         stock: product.stock,
@@ -183,11 +183,11 @@ export function ProductDetail({ product }: { product: Product }) {
             <div className="space-y-1">
               <div className="flex items-baseline gap-3">
                 <span className="font-display text-3xl font-bold text-brand-gold">
-                  {formatPrice(parseFloat(product.displayPrice.toString()))}
+                  {formatPrice(product.displayPrice || 0)}
                 </span>
                 {product.comparePrice && (
                   <span className="text-lg text-brand-muted line-through">
-                    {formatPrice(parseFloat(product.comparePrice.toString()))}
+                    {formatPrice(product.comparePrice)}
                   </span>
                 )}
               </div>
@@ -196,8 +196,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   <Crown className="w-3.5 h-3.5" />
                   Prix membre appliqué — économisez{" "}
                   {formatPrice(
-                    parseFloat(product.price.toString()) -
-                      parseFloat(product.displayPrice.toString())
+                    (product.price || 0) - (product.displayPrice || 0)
                   )}
                 </div>
               )}
@@ -207,7 +206,7 @@ export function ProductDetail({ product }: { product: Product }) {
                   <span>
                     Prix membre :{" "}
                     <span className="text-brand-gold font-medium">
-                      {formatPrice(parseFloat(product.memberPrice.toString()))}
+                      {formatPrice(product.memberPrice)}
                     </span>
                   </span>
                   <Link href="/contact" className="text-brand-gold underline ml-1">

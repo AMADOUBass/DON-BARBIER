@@ -78,21 +78,113 @@ async function main() {
   await prisma.stylistService.create({ data: { stylistId: sGrace.id, serviceId: ser5.id } });
   await prisma.stylistService.create({ data: { stylistId: sWed.id, serviceId: ser2.id } });
 
-  // 5. Boutique (9 Produits Premium)
+  // 5. Boutique (Produits Premium Don Barbier)
   const catS = await prisma.productCategory.create({ data: { name: "Soins & Barbe", slug: "soins-barbe" } });
   const catH = await prisma.productCategory.create({ data: { name: "Shampooing & Soins", slug: "shampooing-soins" } });
   const catA = await prisma.productCategory.create({ data: { name: "Accessoires Prestige", slug: "accessoires-prestige" } });
   const catK = await prisma.productCategory.create({ data: { name: "Kits & Coffrets", slug: "kits-coffrets" } });
 
-  await prisma.product.create({ data: { name: "Huile Barbe Signature Don", slug: "huile-barbe-signature", price: 35, stock: 20, images: ["/images/products/beard-oil-signature.png"], categoryId: catS.id, isFeatured: true, description: "Le secret d'Elvis pour une barbe domptée. Un mélange d'huiles rares infusé d'un parfum boisé et épicé qui dure toute la journée." } });
-  await prisma.product.create({ data: { name: "Baume Sculptant Elite", slug: "baume-elite", price: 28, stock: 15, images: ["https://images.unsplash.com/photo-1596755389378-c31d21fd1273?q=80&w=1976"], categoryId: catS.id, isFeatured: true, description: "La finition mate préférée du salon. Idéal pour fixer vos coupes courtes ou sculpter votre barbe sans aucun résidu gras." } });
-  await prisma.product.create({ data: { name: "Shampoing Deep Clean", slug: "shampoing-deep-clean", price: 32, stock: 25, images: ["https://images.unsplash.com/photo-1559599141-3816a0b37207?q=80&w=2070"], categoryId: catH.id, description: "Élimine les résidus de produits et la sueur sans assécher vos boucles. Essentiel pour un cuir chevelu sain entre deux coupes." } });
-  await prisma.product.create({ data: { name: "Après-Shampoing Silk Afro", slug: "silk-afro", price: 30, stock: 20, images: ["https://images.unsplash.com/photo-1620916566398-39f1143af7be?q=80&w=1974"], categoryId: catH.id, description: "Redonne vie aux cheveux texturés. Ce soin démêle instantanément et laisse vos cheveux incroyablement doux et maniables." } });
-  await prisma.product.create({ data: { name: "Brosse Poils de Sanglier", slug: "brosse-sanglier", price: 45, stock: 10, images: ["https://images.unsplash.com/photo-1621607512214-68297480165e?q=80&w=2070"], categoryId: catA.id, description: "L'outil ultime pour brosser vos waves et répartir vos huiles. Manche en bois noble pour une prise en main digne d'un pro." } });
-  await prisma.product.create({ data: { name: "Peigne en Corne Artisanal", slug: "peigne-corne", price: 25, stock: 12, images: ["https://images.unsplash.com/photo-1544026850-2f31a1936e76?q=80&w=2070"], categoryId: catA.id, description: "Un classique indémodable. Antistatique et ultra-lisse, il glisse dans les cheveux les plus denses sans les casser." } });
-  await prisma.product.create({ data: { name: "Sérum Croissance Boost", slug: "serum-boost", price: 55, stock: 8, images: ["https://images.unsplash.com/photo-1623122119337-67b1cb4172f3?q=80&w=2070"], categoryId: catS.id, isFeatured: true, description: "Formulation avancée pour stimuler la racine et densifier les zones dégarnies de votre barbe ou de votre chevelure." } });
-  await prisma.product.create({ data: { name: "Gel Rasage Précision", slug: "gel-precision", price: 22, stock: 30, images: ["https://images.unsplash.com/photo-1592186591040-5e609ca08197?q=80&w=1935"], categoryId: catS.id, description: "La transparence totale pour des contours au rasoir d'une netteté chirurgicale. Protège la peau contre l'irritation." } });
-  await prisma.product.create({ data: { name: "Kit Voyage Prestige", slug: "kit-prestige", price: 95, stock: 5, images: ["/images/products/product-kit.png"], categoryId: catK.id, isFeatured: true, description: "Ne compromettez jamais votre style. Vos essentiels Don Barbier réunis dans une trousse en cuir élégante." } });
+  await prisma.product.create({ 
+    data: { 
+      name: "Huile à Barbe Premium (Baobab & Santal)", 
+      slug: "huile-barbe-premium", 
+      price: 42, 
+      stock: 30, 
+      images: ["/images/products/beard-oil.png"], 
+      categoryId: catS.id, 
+      isFeatured: true, 
+      description: "L'essence du Don. Un mélange précieux d'huile de baobab et de bois de santal pour une barbe souple, hydratée et divinement parfumée. Élimine les démangeaisons et favorise une croissance saine." 
+    } 
+  });
+  
+  await prisma.product.create({ 
+    data: { 
+      name: "Beurre de Karité Capillaire Pur", 
+      slug: "beurre-karite-pur", 
+      price: 35, 
+      stock: 25, 
+      images: ["/images/products/shea-butter.png"], 
+      categoryId: catH.id, 
+      isFeatured: true, 
+      description: "Soin profond pour cheveux texturés. Ce beurre de karité bio ultra-nourrissant scelle l'hydratation et définit vos boucles sans laisser de résidus gras." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Brosse à Waves (Bois de Rose)", 
+      slug: "brosse-waves-rosewood", 
+      price: 55, 
+      stock: 15, 
+      images: ["/images/products/waves-brush.png"], 
+      categoryId: catA.id, 
+      isFeatured: true, 
+      description: "L'outil ultime pour des waves parfaites. Conçue en bois de rose noble avec des poils de sanglier naturels pour une compression optimale du cheveu." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Peigne Afro Artisanal en Bois", 
+      slug: "peigne-afro-bois", 
+      price: 28, 
+      stock: 40, 
+      images: ["/images/products/afro-comb.png"], 
+      categoryId: catA.id, 
+      description: "Démêlage tout en douceur. Ce peigne antistatique en bois poli respecte la fibre capillaire et évite la casse, tout en offrant une prise en main iconique." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Durag en Soie Premium 'Don Gold'", 
+      slug: "durag-soie-gold", 
+      price: 30, 
+      stock: 50, 
+      images: ["/images/products/silk-durag.png"], 
+      categoryId: catA.id, 
+      isFeatured: true, 
+      description: "Élégance et protection. Tissage en soie de haute qualité pour maintenir vos styles et vos waves durant la nuit avec une brillance incomparable." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Gel de Traçage Précision", 
+      slug: "gel-tracing-precision", 
+      price: 24, 
+      stock: 45, 
+      images: ["/images/products/tracing-gel.png"], 
+      categoryId: catS.id, 
+      description: "Pour des contours d'une netteté chirurgicale. Gel transparent permettant une visibilité totale lors de l'utilisation du rasoir." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Shampoing Hydratant 'Heritage'", 
+      slug: "shampoing-heritage", 
+      price: 38, 
+      stock: 20, 
+      images: ["https://images.unsplash.com/photo-1559599141-3816a0b37207?q=80&w=2070"], 
+      categoryId: catH.id, 
+      description: "Formule sans sulfate enrichie en huiles naturelles pour nettoyer en profondeur sans agresser le cuir chevelu." 
+    } 
+  });
+
+  await prisma.product.create({ 
+    data: { 
+      name: "Coffret Cadeau 'Le Don'", 
+      slug: "coffret-cadeau-don", 
+      price: 120, 
+      comparePrice: 150,
+      stock: 10, 
+      images: ["/images/products/product-kit.png"], 
+      categoryId: catK.id, 
+      isFeatured: true, 
+      description: "Le cadeau idéal. Comprend l'huile signature, la brosse premium et le peigne artisanal dans un coffret de luxe." 
+    } 
+  });
 
   // 6. Galerie (Nos Créations restaurées)
   const gP = [

@@ -37,14 +37,20 @@ export async function GET(req: NextRequest) {
   const total = await prisma.product.count({ where });
 
   // Serialize Decimal fields + apply member pricing
-  const enriched = products.map((p) => ({
-    ...p,
-    price: parseFloat(p.price.toString()),
-    comparePrice: p.comparePrice ? parseFloat(p.comparePrice.toString()) : null,
-    memberPrice: p.memberPrice ? parseFloat(p.memberPrice.toString()) : null,
-    displayPrice: parseFloat((isMember && p.memberPrice ? p.memberPrice : p.price).toString()),
-    isMemberDiscount: isMember && !!p.memberPrice,
-  }));
+  const enriched = products.map((p) => {
+    const rawPrice = p.price ? parseFloat(p.price.toString()) : 0;
+    const rawMemberPrice = p.memberPrice ? parseFloat(p.memberPrice.toString()) : null;
+    const displayPrice = isMember && rawMemberPrice ? rawMemberPrice : rawPrice;
+
+    return {
+      ...p,
+      price: rawPrice,
+      comparePrice: p.comparePrice ? parseFloat(p.comparePrice.toString()) : null,
+      memberPrice: rawMemberPrice,
+      displayPrice: displayPrice,
+      isMemberDiscount: isMember && !!rawMemberPrice,
+    };
+  });
 
   return NextResponse.json({ products: enriched, total, page, pages: Math.ceil(total / limit) });
 }

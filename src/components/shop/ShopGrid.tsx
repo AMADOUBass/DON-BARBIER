@@ -14,9 +14,9 @@ interface Product {
   name: string;
   slug: string;
   images: string[];
-  price: string;
-  comparePrice: string | null;
-  displayPrice: string;
+  price: number;
+  comparePrice: number | null;
+  displayPrice: number;
   stock: number;
   isMemberOnly: boolean;
   isMemberDiscount: boolean;
@@ -38,7 +38,7 @@ export function ShopGrid() {
     addItem({
       id: product.id,
       name: product.name,
-      price: parseFloat(product.displayPrice),
+      price: product.displayPrice || 0,
       image: product.images[0] ?? "",
       slug: product.slug,
       stock: product.stock,
@@ -106,16 +106,16 @@ export function ShopGrid() {
           <div className="flex items-center justify-between mt-2 sm:mt-3 gap-2">
             <div className="min-w-0">
               <p className={`font-semibold text-sm sm:text-base ${product.isMemberDiscount ? "text-brand-gold" : "text-brand-beige"}`}>
-                {formatPrice(parseFloat(product.displayPrice))}
+                {formatPrice(product.displayPrice || 0)}
               </p>
               {(product.comparePrice && !product.isMemberDiscount) && (
                 <p className="text-xs text-brand-muted line-through">
-                  {formatPrice(parseFloat(product.comparePrice))}
+                  {formatPrice(product.comparePrice)}
                 </p>
               )}
               {product.isMemberDiscount && (
                 <p className="text-xs text-brand-muted line-through">
-                  {formatPrice(parseFloat(product.price))}
+                  {formatPrice(product.price || 0)}
                 </p>
               )}
             </div>
