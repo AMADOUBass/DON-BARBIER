@@ -87,8 +87,9 @@ export default async function ServicesPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {items.map((service) => {
-                  const priceNum = parseFloat(service.basePrice.toString());
-                  const depositAmt = (priceNum * service.depositPct) / 100;
+                  const priceNum = service.basePrice ? parseFloat(service.basePrice.toString()) : 0;
+                  const depositPct = service.depositPct ?? 30;
+                  const depositAmt = (priceNum * depositPct) / 100;
                   return (
                     <article
                       key={service.id}

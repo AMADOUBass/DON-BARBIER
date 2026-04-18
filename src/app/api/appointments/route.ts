@@ -157,7 +157,8 @@ export async function POST(req: NextRequest) {
   }
 
   // Create Stripe checkout
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const origin = req.headers.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "https://don-barbier.vercel.app";
+  
   const stripeSession = await createBookingCheckout({
     appointmentId: appointment.id,
     serviceName: service.name,
@@ -165,8 +166,8 @@ export async function POST(req: NextRequest) {
     totalAmountCents: Math.round(parseFloat(totalPrice.toString()) * 100),
     depositPercent: depositPct,
     clientEmail: session.user.email,
-    successUrl: `${baseUrl}/booking/success?appointmentId=${appointment.id}`,
-    cancelUrl: `${baseUrl}/booking?cancelled=true`,
+    successUrl: `${origin}/booking/success?appointmentId=${appointment.id}`,
+    cancelUrl: `${origin}/booking?cancelled=true`,
   });
 
   // Store stripe session ID

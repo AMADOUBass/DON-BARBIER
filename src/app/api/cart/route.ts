@@ -113,9 +113,9 @@ export async function POST(req: NextRequest) {
     }
 
     const origin =
-      req.headers.get("origin") ??
-      process.env.NEXT_PUBLIC_APP_URL ??
-      "http://localhost:3000";
+      req.headers.get("origin") ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "https://don-barbier.vercel.app";
 
     const stripeSession = await createProductCheckout({
       orderId: order.id,
