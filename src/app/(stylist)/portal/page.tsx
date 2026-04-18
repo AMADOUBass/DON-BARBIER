@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { PortalClient } from "@/components/portal/PortalClient";
 

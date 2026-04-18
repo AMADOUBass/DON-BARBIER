@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import { Crown, Users } from "lucide-react";
 import Image from "next/image";
 

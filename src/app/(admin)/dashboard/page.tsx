@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import { formatPrice } from "@/lib/utils";
 import { Calendar, Users, DollarSign, Package, TrendingUp } from "lucide-react";
 import { AdminAppointmentList } from "@/components/admin/AdminAppointmentList";

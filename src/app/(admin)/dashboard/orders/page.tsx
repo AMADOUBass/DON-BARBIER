@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+export const dynamic = "force-dynamic";
 import { formatPrice } from "@/lib/utils";
 import type { Metadata } from "next";
 import { AdminOrdersClient } from "@/components/admin/AdminOrdersClient";
