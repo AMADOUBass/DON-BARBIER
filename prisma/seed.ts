@@ -86,8 +86,6 @@ async function main() {
 
     // --- DESIGN & FINITIONS ---
     { name: "Line-Up Précision", slug: "line-up", durationMins: 15, basePrice: 15, category: "design", imageUrl: "/images/services/design-art.png", description: "Redessiner les contours du front et des tempes au rasoir. Netteté chirurgicale." },
-    { name: "Hair Tattoo / Design", slug: "hair-tattoo", durationMins: 30, basePrice: 30, category: "design", imageUrl: "/images/services/design-art.png", description: "Motifs artistiques gravés dans la chevelure. Selon complexité." },
-    { name: "Hard Part (Raie tracée)", slug: "hard-part", durationMins: 10, basePrice: 10, category: "design", imageUrl: "/images/services/design-art.png", description: "Tracé de la raie au rasoir pour accentuer la structure de la coupe." },
 
     // --- SERVICES BARBE ---
     { name: "Taille de Barbe Sculptée", slug: "taille-barbe", durationMins: 30, basePrice: 30, category: "barbe", imageUrl: "/images/services/beard-grooming.png", description: "Mise en forme, égalisation et hydratation de la barbe aux huiles premium." },
@@ -138,7 +136,7 @@ async function main() {
   }
 
   // Beri (Expertise Freestyle & Designs)
-  for (const slug of ["pompadour", "mullet-moderne", "hair-tattoo"]) {
+  for (const slug of ["pompadour", "mullet-moderne", "line-up"]) {
     await prisma.stylistService.create({ data: { stylistId: sBeri.id, serviceId: getS(slug).id } });
   }
 

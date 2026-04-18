@@ -23,7 +23,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   extra: "Extras & Soins",
 };
 
-const CATEGORY_ORDER = ["classic", "trending", "fade", "design", "barbe", "locks", "braids", "extra"];
+const CATEGORY_ORDER = ["locks", "braids", "fade", "classic", "trending", "design", "barbe", "extra"];
 
 export default async function ServicesPage() {
   const services = await prisma.service.findMany({
