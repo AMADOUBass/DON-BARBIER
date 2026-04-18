@@ -1,0 +1,704 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Calendar, CheckCircle2, TrendingUp, ImageIcon, Clock,
+  User, Phone, Mail, Plus, X, Trash2, Star, Save, Edit3, Settings,
+  CalendarOff, History, CheckSquare,
+} from "lucide-react";
+import { formatPrice } from "@/lib/utils";
+import toast from "react-hot-toast";
+import { UploadDropzone } from "@/lib/uploadthing";
+
+type Specialty = 
+  | "RETWIST" | "INTERLOCKS" | "WOMENS_STYLING" | "STARTER_LOCS" 
+  | "LOC_MAINTENANCE" | "BRAIDING" | "NATURAL_STYLES" 
+  | "SIGNATURE_FADE" | "BARBE" | "LUXE" | "FADE" | "CONTOURS" 
+  | "FREESTYLE" | "TRESSES" | "SOINS_AFRO" | "GROOMING";
+
+const SPECIALTY_LABELS: Record<Specialty, string> = {
+  RETWIST: "Retwist", 
+  INTERLOCKS: "Interlocks", 
+  WOMENS_STYLING: "Coiffure femme",
+  STARTER_LOCS: "Locs débutants", 
+  LOC_MAINTENANCE: "Entretien locs", 
+  BRAIDING: "Tresses", 
+  NATURAL_STYLES: "Styles naturels",
+  SIGNATURE_FADE: "Signature Fade",
+  BARBE: "Soin Barbe",
+  LUXE: "Luxe",
+  FADE: "Dégradé (Fade)",
+  CONTOURS: "Contours",
+  FREESTYLE: "Freestyle",
+  TRESSES: "Tresses",
+  SOINS_AFRO: "Soins Afro",
+  GROOMING: "Grooming",
+};
+
+const DAY_LABELS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
+
+interface Appointment {
+  id: string; status: string; scheduledAt: string; durationMins: number; totalPrice: number; notes: string | null;
+  client: { name: string | null; email: string | null; phone: string | null; image: string | null };
+  service: { name: string; durationMins: number };
+}
+
+interface PortfolioPhoto { id: string; url: string; caption: string | null; tags: string[]; createdAt: string }
+
+interface BlockedSlot {
+  id: string; date: string; startTime: string; endTime: string; reason: string | null;
+}
+
+interface Props {
+  stylist: {
+    id: string; bio: string | null; yearsExp: number; specialties: Specialty[];
+    user: { name: string | null; image: string | null; email: string | null };
+    availability: { dayOfWeek: number; startTime: string; endTime: string; isActive: boolean }[];
+    portfolio: PortfolioPhoto[];
+  };
+  appointments: Appointment[];
+  pastAppointments: Appointment[];
+  blockedSlots: BlockedSlot[];
+  stats: {
+    completedTotal: number; completedThisMonth: number;
+    upcomingCount: number; portfolioCount: number;
+    revenueTotal: number; revenueThisMonth: number;
+  };
+  defaultTab?: "agenda" | "portfolio";
+}
+
+function getInitials(name: string | null) {
+  if (!name) return "?";
+  return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+}
+
+export function PortalClient({ stylist, appointments: initialAppts, pastAppointments, blockedSlots: initialBlocked, stats, defaultTab = "agenda" }: Props) {
+  const [tab, setTab] = useState<"agenda" | "portfolio" | "settings" | "history">(defaultTab as "agenda" | "portfolio" | "settings" | "history");
+  const [portfolio, setPortfolio] = useState(stylist.portfolio);
+  const [showAddPhoto, setShowAddPhoto] = useState(false);
+  const [photoForm, setPhotoForm] = useState({ url: "", caption: "", tags: "" });
+  const [saving, setSaving] = useState(false);
+  const [expandedAppt, setExpandedAppt] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState(initialAppts);
+
+  // Blocked slots
+  const [blockedSlots, setBlockedSlots] = useState(initialBlocked);
+  const [showAddBlock, setShowAddBlock] = useState(false);
+  const [blockForm, setBlockForm] = useState({ date: "", startTime: "09:00", endTime: "17:00", reason: "" });
+  const [savingBlock, setSavingBlock] = useState(false);
+
+  // Editable availability
+  const [editAvailability, setEditAvailability] = useState(
+    DAY_LABELS.map((label, i) => {
+      const existing = stylist.availability.find((a) => a.dayOfWeek === i);
+      return {
+        dayOfWeek: i,
+        label,
+        isActive: existing?.isActive ?? false,
+        startTime: existing?.startTime ?? "09:00",
+        endTime: existing?.endTime ?? "17:00",
+      };
+    })
+  );
+  const [savingAvail, setSavingAvail] = useState(false);
+
+  // Editable profile
+  const [bio, setBio] = useState(stylist.bio ?? "");
+  const [yearsExp, setYearsExp] = useState(stylist.yearsExp);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  async function addPortfolioPhoto() {
+    if (!photoForm.url) { toast.error("URL requise"); return; }
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/stylists/${stylist.id}/portfolio`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: photoForm.url,
+          caption: photoForm.caption || undefined,
+          tags: photoForm.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        }),
+      });
+      if (!res.ok) throw new Error();
+      const photo = await res.json() as PortfolioPhoto;
+      setPortfolio((prev) => [{ ...photo, createdAt: typeof photo.createdAt === "string" ? photo.createdAt : new Date().toISOString() }, ...prev]);
+      setPhotoForm({ url: "", caption: "", tags: "" });
+      setShowAddPhoto(false);
+      toast.success("Photo ajoutée au portfolio");
+    } catch {
+      toast.error("Impossible d'ajouter la photo");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function deletePortfolioPhoto(id: string) {
+    if (!confirm("Supprimer cette photo ?")) return;
+    try {
+      await fetch(`/api/stylists/${stylist.id}/portfolio/${id}`, { method: "DELETE" });
+      setPortfolio((prev) => prev.filter((p) => p.id !== id));
+      toast.success("Photo supprimée");
+    } catch {
+      toast.error("Erreur");
+    }
+  }
+
+  const statCards = [
+    { label: "RDV ce mois", value: stats.completedThisMonth, icon: TrendingUp, color: "text-brand-gold" },
+    { label: "Revenus (mois)", value: formatPrice(stats.revenueThisMonth), icon: TrendingUp, color: "text-green-400" },
+    { label: "Revenus (total)", value: formatPrice(stats.revenueTotal), icon: TrendingUp, color: "text-green-400" },
+    { label: "Photos", value: stats.portfolioCount, icon: ImageIcon, color: "text-purple-400" },
+  ];
+
+  async function saveAvailability() {
+    setSavingAvail(true);
+    try {
+      const availability = editAvailability
+        .filter((a) => a.isActive)
+        .map(({ dayOfWeek, startTime, endTime }) => ({ dayOfWeek, startTime, endTime }));
+      const res = await fetch(`/api/stylists/${stylist.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ availability }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Disponibilités mises à jour");
+    } catch {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingAvail(false);
+    }
+  }
+
+  async function saveProfile() {
+    setSavingProfile(true);
+    try {
+      const res = await fetch(`/api/stylists/${stylist.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bio: bio || undefined, yearsExp }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("Profil mis à jour");
+    } catch {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setSavingProfile(false);
+    }
+  }
+
+  function updateAvailDay(index: number, field: "isActive" | "startTime" | "endTime", value: string | boolean) {
+    setEditAvailability((prev) =>
+      prev.map((a, i) => (i === index ? { ...a, [field]: value } : a))
+    );
+  }
+
+  async function addBlockedSlot() {
+    if (!blockForm.date) { toast.error("Date requise"); return; }
+    setSavingBlock(true);
+    try {
+      const res = await fetch("/api/blocked-slots", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(blockForm),
+      });
+      if (!res.ok) throw new Error();
+      const slot = await res.json() as BlockedSlot;
+      setBlockedSlots((prev) => [...prev, slot].sort((a, b) => a.date.localeCompare(b.date)));
+      setBlockForm({ date: "", startTime: "09:00", endTime: "17:00", reason: "" });
+      setShowAddBlock(false);
+      toast.success("Créneau bloqué ajouté");
+    } catch {
+      toast.error("Erreur");
+    } finally {
+      setSavingBlock(false);
+    }
+  }
+
+  async function deleteBlockedSlot(id: string) {
+    if (!confirm("Supprimer ce créneau bloqué ?")) return;
+    try {
+      await fetch(`/api/blocked-slots?id=${id}`, { method: "DELETE" });
+      setBlockedSlots((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Créneau supprimé");
+    } catch {
+      toast.error("Erreur");
+    }
+  }
+
+  async function markCompleted(apptId: string) {
+    try {
+      const res = await fetch(`/api/appointments/${apptId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "COMPLETED" }),
+      });
+      if (!res.ok) throw new Error();
+      setAppointments((prev) => prev.filter((a) => a.id !== apptId));
+      toast.success("Rendez-vous marqué comme terminé");
+    } catch {
+      toast.error("Erreur");
+    }
+  }
+
+  return (
+    <div className="space-y-8 pt-6">
+      {/* Profile header */}
+      <div className="flex items-center gap-4">
+        <div className="w-16 h-16 rounded-xl bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold text-xl overflow-hidden shrink-0">
+          {stylist.user.image
+            ? <Image src={stylist.user.image} alt="" width={64} height={64} className="object-cover w-full h-full" />
+            : getInitials(stylist.user.name)}
+        </div>
+        <div>
+          <h1 className="font-display text-2xl font-bold text-brand-beige">{stylist.user.name ?? "Mon portail"}</h1>
+          <p className="text-brand-muted text-sm">{stylist.user.email}</p>
+          {stylist.specialties.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {stylist.specialties.map((s) => (
+                <span key={s} className="text-xs bg-brand-gold/10 text-brand-gold px-2 py-0.5 rounded-full">
+                  {SPECIALTY_LABELS[s]}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {statCards.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="card text-center">
+            <Icon className={`w-6 h-6 ${color} mx-auto mb-2`} />
+            <p className={`font-display text-2xl font-bold ${color}`}>{value}</p>
+            <p className="text-xs text-brand-muted mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Availability summary */}
+      <div className="card">
+        <h2 className="font-semibold text-brand-beige mb-3 flex items-center gap-2">
+          <Clock className="w-4 h-4 text-brand-gold" />
+          Mes disponibilités
+        </h2>
+        <div className="flex gap-2 flex-wrap">
+          {DAY_LABELS.map((label, i) => {
+            const avail = stylist.availability.find((a) => a.dayOfWeek === i);
+            return (
+              <div key={i} className={`px-3 py-2 rounded-xl text-xs font-medium ${avail?.isActive ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/20" : "bg-brand-charcoal text-brand-muted"}`}>
+                <p className="font-semibold">{label}</p>
+                {avail?.isActive && <p className="text-brand-gold/70">{avail.startTime}–{avail.endTime}</p>}
+                {!avail?.isActive && <p>Fermé</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 bg-brand-charcoal rounded-xl p-1 w-fit overflow-x-auto">
+        {(["agenda", "history", "portfolio", "settings"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+              tab === t ? "bg-brand-gold text-brand-black" : "text-brand-muted hover:text-brand-beige"
+            }`}
+          >
+            {t === "agenda" ? <><Calendar className="w-4 h-4" />Agenda ({appointments.length})</>
+              : t === "history" ? <><History className="w-4 h-4" />Historique ({pastAppointments.length})</>
+              : t === "portfolio" ? <><ImageIcon className="w-4 h-4" />Portfolio ({portfolio.length})</>
+              : <><Settings className="w-4 h-4" />Paramètres</>}
+          </button>
+        ))}
+      </div>
+
+      {/* Agenda */}
+      {tab === "agenda" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+          {appointments.length === 0 ? (
+            <div className="card text-center py-10">
+              <Calendar className="w-8 h-8 text-brand-muted mx-auto mb-2" />
+              <p className="text-brand-muted">Aucun rendez-vous à venir</p>
+            </div>
+          ) : (
+            appointments.map((appt) => {
+              const date = new Date(appt.scheduledAt);
+              const isExpanded = expandedAppt === appt.id;
+              return (
+                <div key={appt.id} className="card cursor-pointer" onClick={() => setExpandedAppt(isExpanded ? null : appt.id)}>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex flex-col items-center justify-center text-brand-gold shrink-0">
+                      <span className="text-xs font-bold leading-none">{date.toLocaleDateString("fr-CA",{month:"short"}).toUpperCase()}</span>
+                      <span className="font-display text-lg font-bold leading-none">{date.getDate()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-brand-beige">{appt.service.name}</p>
+                      <p className="text-sm text-brand-muted">
+                        {date.toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"})} · {appt.durationMins} min
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-brand-gold">{formatPrice(appt.totalPrice)}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${appt.status === "ACCEPTED" ? "bg-green-400/10 text-green-400" : "bg-blue-400/10 text-blue-400"}`}>
+                        {appt.status === "ACCEPTED" ? "Confirmé" : "En attente"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                        className="border-t border-brand-charcoal mt-4 pt-4 space-y-2 overflow-hidden"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold text-xs font-bold shrink-0 overflow-hidden">
+                            {appt.client.image
+                              ? <Image src={appt.client.image} alt="" width={32} height={32} className="rounded-full" />
+                              : getInitials(appt.client.name)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-brand-beige">{appt.client.name ?? "Cliente"}</p>
+                            <div className="flex items-center gap-3 text-xs text-brand-muted">
+                              {appt.client.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{appt.client.email}</span>}
+                              {appt.client.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{appt.client.phone}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {appt.notes && (
+                          <p className="text-xs text-brand-muted italic bg-brand-black/40 rounded-lg px-3 py-2">
+                            Note : {appt.notes}
+                          </p>
+                        )}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); void markCompleted(appt.id); }}
+                          className="inline-flex items-center gap-1.5 text-xs bg-green-400/10 text-green-400 px-3 py-1.5 rounded-lg hover:bg-green-400/20 transition-colors mt-1"
+                        >
+                          <CheckSquare className="w-3.5 h-3.5" /> Marquer terminé
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            })
+          )}
+        </motion.div>
+      )}
+
+      {/* History */}
+      {tab === "history" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
+          {pastAppointments.length === 0 ? (
+            <div className="card text-center py-10">
+              <History className="w-8 h-8 text-brand-muted mx-auto mb-2" />
+              <p className="text-brand-muted">Aucun rendez-vous passé</p>
+            </div>
+          ) : (
+            pastAppointments.map((appt) => {
+              const date = new Date(appt.scheduledAt);
+              const statusColor = appt.status === "COMPLETED" ? "text-green-400 bg-green-400/10" : appt.status === "CANCELLED" ? "text-red-400 bg-red-400/10" : "text-brand-muted bg-brand-muted/10";
+              const statusLabel = appt.status === "COMPLETED" ? "Terminé" : appt.status === "CANCELLED" ? "Annulé" : appt.status;
+              return (
+                <div key={appt.id} className="card opacity-75 hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-brand-charcoal rounded-xl flex flex-col items-center justify-center text-brand-muted shrink-0">
+                      <span className="text-xs font-bold leading-none">{date.toLocaleDateString("fr-CA",{month:"short"}).toUpperCase()}</span>
+                      <span className="font-display text-lg font-bold leading-none">{date.getDate()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-brand-beige">{appt.service.name}</p>
+                      <p className="text-sm text-brand-muted">
+                        {appt.client.name ?? "Cliente"} · {date.toLocaleTimeString("fr-CA",{hour:"2-digit",minute:"2-digit"})}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="font-semibold text-brand-muted">{formatPrice(appt.totalPrice)}</p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${statusColor}`}>{statusLabel}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </motion.div>
+      )}
+
+      {/* Portfolio */}
+      {tab === "portfolio" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+          <button onClick={() => setShowAddPhoto(true)} className="btn-outline flex items-center gap-2 w-full justify-center py-3 border-dashed">
+            <Plus className="w-4 h-4" />
+            Ajouter une photo au portfolio
+          </button>
+
+          {portfolio.length === 0 ? (
+            <div className="card text-center py-10">
+              <ImageIcon className="w-8 h-8 text-brand-muted mx-auto mb-2" />
+              <p className="text-brand-muted">Portfolio vide — ajoutez vos meilleures réalisations</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {portfolio.map((photo) => (
+                <div key={photo.id} className="group relative aspect-square rounded-xl overflow-hidden bg-brand-charcoal">
+                  <Image src={photo.url} alt={photo.caption ?? ""} fill className="object-cover" />
+                  <div className="absolute inset-0 bg-brand-black/0 group-hover:bg-brand-black/50 transition-all flex items-end justify-between p-2 opacity-0 group-hover:opacity-100">
+                    <div className="flex-1">
+                      {photo.caption && <p className="text-xs text-white line-clamp-2">{photo.caption}</p>}
+                    </div>
+                    <button
+                      onClick={() => void deletePortfolioPhoto(photo.id)}
+                      className="p-1.5 rounded-lg bg-red-400/20 text-red-400 hover:bg-red-400/30 transition-colors ml-2"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
+
+      {/* Settings tab */}
+      {tab === "settings" && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+          {/* Edit availability */}
+          <div className="card space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-brand-beige flex items-center gap-2">
+                <Clock className="w-4 h-4 text-brand-gold" />
+                Modifier mes disponibilités
+              </h2>
+              <button onClick={saveAvailability} disabled={savingAvail} className="btn-primary text-sm gap-2 px-4 py-2">
+                {savingAvail ? <span className="w-3.5 h-3.5 border-2 border-brand-black/30 border-t-brand-black rounded-full animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                {savingAvail ? "Sauvegarde..." : "Sauvegarder"}
+              </button>
+            </div>
+            <div className="space-y-3">
+              {editAvailability.map((day, i) => (
+                <div key={day.dayOfWeek} className="flex items-center gap-4 p-3 rounded-lg bg-brand-black/40 border border-white/5">
+                  <label className="flex items-center gap-3 w-28">
+                    <input
+                      type="checkbox"
+                      checked={day.isActive}
+                      onChange={(e) => updateAvailDay(i, "isActive", e.target.checked)}
+                      className="w-4 h-4 accent-brand-gold rounded"
+                    />
+                    <span className={`text-sm font-medium ${day.isActive ? "text-brand-beige" : "text-brand-muted line-through"}`}>
+                      {day.label}
+                    </span>
+                  </label>
+                  {day.isActive ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="time"
+                        value={day.startTime}
+                        onChange={(e) => updateAvailDay(i, "startTime", e.target.value)}
+                        className="input py-1.5 px-3 w-32 text-sm"
+                      />
+                      <span className="text-brand-muted text-sm">à</span>
+                      <input
+                        type="time"
+                        value={day.endTime}
+                        onChange={(e) => updateAvailDay(i, "endTime", e.target.value)}
+                        className="input py-1.5 px-3 w-32 text-sm"
+                      />
+                    </div>
+                  ) : (
+                    <span className="text-sm text-red-400">Fermé</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Edit profile / bio */}
+          <div className="card space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-brand-beige flex items-center gap-2">
+                <Edit3 className="w-4 h-4 text-brand-gold" />
+                Mon profil
+              </h2>
+              <button onClick={saveProfile} disabled={savingProfile} className="btn-primary text-sm gap-2 px-4 py-2">
+                {savingProfile ? <span className="w-3.5 h-3.5 border-2 border-brand-black/30 border-t-brand-black rounded-full animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                {savingProfile ? "Sauvegarde..." : "Sauvegarder"}
+              </button>
+            </div>
+            <div>
+              <label className="label">Bio / Présentation</label>
+              <textarea
+                className="input min-h-[120px] resize-y"
+                placeholder="Parlez de votre expérience, votre spécialité, votre passion..."
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+              />
+              <p className="text-xs text-brand-muted mt-1">Cette bio sera visible par les clientes sur la page équipe.</p>
+            </div>
+            <div>
+              <label className="label">Années d&apos;expérience</label>
+              <input
+                type="number"
+                className="input w-32"
+                min={0}
+                max={50}
+                value={yearsExp}
+                onChange={(e) => setYearsExp(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <label className="label">Spécialités</label>
+              <div className="flex flex-wrap gap-2 mt-1">
+                {stylist.specialties.length > 0 ? (
+                  stylist.specialties.map((s) => (
+                    <span key={s} className="text-xs bg-brand-gold/10 text-brand-gold px-3 py-1 rounded-full">
+                      {SPECIALTY_LABELS[s]}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-sm text-brand-muted">Aucune spécialité définie. Contactez l&apos;admin pour les modifier.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Blocked time slots */}
+          <div className="card space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-semibold text-brand-beige flex items-center gap-2">
+                <CalendarOff className="w-4 h-4 text-brand-gold" />
+                Créneaux bloqués
+              </h2>
+              <button onClick={() => setShowAddBlock(!showAddBlock)} className="btn-outline text-sm gap-2 px-3 py-1.5">
+                <Plus className="w-3.5 h-3.5" /> Ajouter
+              </button>
+            </div>
+            <p className="text-xs text-brand-muted">Bloquez des créneaux pour les vacances, jours de maladie, etc.</p>
+
+            {showAddBlock && (
+              <div className="bg-brand-black/40 rounded-xl p-4 space-y-3 border border-white/5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="label">Date</label>
+                    <input type="date" className="input text-sm" value={blockForm.date} onChange={(e) => setBlockForm((f) => ({ ...f, date: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="label">De</label>
+                    <input type="time" className="input text-sm" value={blockForm.startTime} onChange={(e) => setBlockForm((f) => ({ ...f, startTime: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="label">À</label>
+                    <input type="time" className="input text-sm" value={blockForm.endTime} onChange={(e) => setBlockForm((f) => ({ ...f, endTime: e.target.value }))} />
+                  </div>
+                </div>
+                <div>
+                  <label className="label">Raison (optionnel)</label>
+                  <input className="input text-sm" placeholder="Vacances, rendez-vous médical..." value={blockForm.reason} onChange={(e) => setBlockForm((f) => ({ ...f, reason: e.target.value }))} />
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowAddBlock(false)} className="btn-outline text-sm flex-1">Annuler</button>
+                  <button onClick={addBlockedSlot} disabled={savingBlock} className="btn-primary text-sm flex-1 gap-2">
+                    {savingBlock ? "Ajout..." : "Bloquer ce créneau"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {blockedSlots.length === 0 && !showAddBlock && (
+              <p className="text-sm text-brand-muted text-center py-4">Aucun créneau bloqué.</p>
+            )}
+
+            {blockedSlots.length > 0 && (
+              <div className="space-y-2">
+                {blockedSlots.map((slot) => (
+                  <div key={slot.id} className="flex items-center justify-between bg-brand-black/40 rounded-lg p-3 border border-white/5">
+                    <div>
+                      <p className="text-sm font-medium text-brand-beige">
+                        {new Date(slot.date + "T00:00:00").toLocaleDateString("fr-CA", { weekday: "short", day: "numeric", month: "short" })}
+                        <span className="text-brand-muted ml-2">{slot.startTime} – {slot.endTime}</span>
+                      </p>
+                      {slot.reason && <p className="text-xs text-brand-muted">{slot.reason}</p>}
+                    </div>
+                    <button onClick={() => void deleteBlockedSlot(slot.id)} className="text-red-400 hover:text-red-300 p-1">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+
+      {/* Add photo modal */}
+      <AnimatePresence>
+        {showAddPhoto && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-brand-black/80 flex items-center justify-center z-50 p-4"
+            onClick={(e) => e.target === e.currentTarget && setShowAddPhoto(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-brand-charcoal rounded-2xl p-6 w-full max-w-md space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="font-display text-xl font-bold text-brand-beige">Ajouter au portfolio</h2>
+                <button onClick={() => setShowAddPhoto(false)} className="text-brand-muted hover:text-brand-beige"><X className="w-5 h-5" /></button>
+              </div>
+              <div>
+                <label className="label mb-2 block">Photo complète *</label>
+                {!photoForm.url ? (
+                  <UploadDropzone
+                    endpoint="portfolioUploader"
+                    onClientUploadComplete={(res) => {
+                      const uploadedUrl = res?.[0]?.url;
+                      if (uploadedUrl) {
+                        setPhotoForm((f) => ({ ...f, url: uploadedUrl }));
+                        toast.success("Photo uploadée avec succès !");
+                      }
+                    }}
+                    onUploadError={(error) => {
+                      toast.error(`Erreur: ${error.message}`);
+                    }}
+                    appearance={{
+                      button: "bg-brand-gold text-brand-black hover:bg-brand-gold-light",
+                      container: "border-brand-gold/20 bg-brand-black/50 p-4 border-dashed",
+                    }}
+                  />
+                ) : (
+                  <p className="text-sm text-green-400 flex items-center gap-1"><CheckCircle2 className="w-4 h-4" /> Photo prête</p>
+                )}
+              </div>
+              {photoForm.url && (
+                <div className="relative h-40 rounded-xl overflow-hidden bg-brand-black">
+                  <Image src={photoForm.url} alt="Aperçu" fill className="object-contain" />
+                </div>
+              )}
+              <div>
+                <label className="label">Légende</label>
+                <input className="input w-full" value={photoForm.caption} onChange={(e) => setPhotoForm((f) => ({ ...f, caption: e.target.value }))} />
+              </div>
+              <div>
+                <label className="label">Tags (virgule)</label>
+                <input className="input w-full" placeholder="locs, retwist..." value={photoForm.tags} onChange={(e) => setPhotoForm((f) => ({ ...f, tags: e.target.value }))} />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setShowAddPhoto(false)} className="btn-outline flex-1">Annuler</button>
+                <button onClick={addPortfolioPhoto} disabled={saving} className="btn-primary flex-1 disabled:opacity-60">
+                  {saving ? "Ajout..." : "Ajouter"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+

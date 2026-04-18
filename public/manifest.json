@@ -1,0 +1,23 @@
+{
+  "name": "Le Don Barbier — Excellence Afro",
+  "short_name": "Don Barbier",
+  "description": "Barbershop de luxe à Québec spécialisé en coiffures afro, locs et grooming masculin.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#D4AF37",
+  "icons": [
+    {
+      "src": "/logo-db.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-db.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
