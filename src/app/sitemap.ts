@@ -28,17 +28,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })) as MetadataRoute.Sitemap
 
   // Dynamic products
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    select: { slug: true, updatedAt: true },
-  })
+  let productSitemap: MetadataRoute.Sitemap = []
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      select: { slug: true, updatedAt: true },
+    })
 
-  const productSitemap = products.map((p) => ({
-    url: `${baseUrl}/shop/${p.slug}`,
-    lastModified: p.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  })) as MetadataRoute.Sitemap
+    productSitemap = products.map((p) => ({
+      url: `${baseUrl}/shop/${p.slug}`,
+      lastModified: p.updatedAt,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    })) as MetadataRoute.Sitemap
+  } catch (error) {
+    console.error('Sitemap generation: Could not reach database, skipping dynamic products.')
+  }
 
   return [...staticSitemap, ...productSitemap]
 }
