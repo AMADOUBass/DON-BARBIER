@@ -117,11 +117,11 @@ export const viewport: Viewport = {
 };
 
 
-
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import PostHogPageView from "@/components/layout/PostHogPageView";
 import { CookieConsent } from "@/components/layout/CookieConsent";
+import { ScrollProgressBar } from "@/components/ui/ScrollProgressBar";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -131,6 +131,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://us.i.posthog.com" />
       </head>
       <body className="min-h-screen flex flex-col bg-brand-black text-brand-beige">
+        <ScrollProgressBar />
         <PostHogPageView />
         <CookieConsent />
         <script
