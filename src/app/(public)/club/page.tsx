@@ -77,6 +77,8 @@ export default function ClubPage() {
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
 
+  const userHasMembership = session?.user && (session.user as any)?.membershipTier && (session.user as any)?.membershipTier !== "NONE";
+
   const handleSubscribe = async (tier: string) => {
     if (!session) {
       toast.error("Veuillez vous connecter pour rejoindre le Club");
@@ -121,15 +123,17 @@ export default function ClubPage() {
               <Sparkles className="w-3.5 h-3.5" /> Exclusivité & Prestige
             </div>
             <h1 className="font-display text-4xl md:text-6xl font-bold text-brand-beige mb-6 tracking-tight">
-              Rejoignez le <span className="text-brand-gold italic">Club Privé</span>
+              {userHasMembership ? "Bienvenue dans le " : "Rejoignez le "}<span className="text-brand-gold italic">Club Privé</span>
             </h1>
             <p className="text-brand-muted max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-              Plus qu&apos;un abonnement, une promesse d&apos;excellence. Un service sur-mesure pour ceux qui placent leur image au cœur de leur réussite.
+              {userHasMembership 
+                ? "Votre image est au cœur de votre réussite. Profitez de vos privilèges exclusifs dès maintenant."
+                : "Plus qu'un abonnement, une promesse d'excellence. Un service sur-mesure pour ceux qui placent leur image au cœur de leur réussite."}
             </p>
           </div>
         </ScrollReveal>
 
-        {session?.user && (session.user as any)?.membershipTier && (session.user as any)?.membershipTier !== "NONE" && (
+        {userHasMembership && (
           <ScrollReveal>
             <div className="max-w-2xl mx-auto mb-16 p-8 rounded-3xl border border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 to-brand-black text-center shadow-lg shadow-brand-gold/5">
               <Crown className="w-10 h-10 text-brand-gold mx-auto mb-4" />
@@ -137,8 +141,24 @@ export default function ClubPage() {
                 Vous êtes membre {(session.user as any).membershipTier}
               </h2>
               <p className="text-sm text-brand-muted mb-6 leading-relaxed">
-                Profitez pleinement de vos avantages exclusifs et consultez vos coupes restantes directement depuis votre espace personnel.
+                Voici vos privilèges exclusifs actuellement actifs :
               </p>
+              
+              {(() => {
+                const userPlan = PLAN_TIERS.find(p => p.id === (session?.user as any)?.membershipTier);
+                if (!userPlan) return null;
+                return (
+                  <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 mb-8">
+                    {userPlan.features.map((feature, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs text-brand-beige bg-brand-charcoal/50 px-3 py-2 rounded-lg border border-white/5">
+                        <Check className="w-3.5 h-3.5 text-brand-gold" />
+                        {feature}
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
               <Link href="/account" className="btn-primary inline-flex">
                 Consulter mon Dashboard
               </Link>
@@ -146,9 +166,11 @@ export default function ClubPage() {
           </ScrollReveal>
         )}
 
-        {/* Pricing Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-8">
-          {PLAN_TIERS.map((plan, idx) => {
+        {!userHasMembership && (
+          <>
+            {/* Pricing Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-8">
+              {PLAN_TIERS.map((plan, idx) => {
             const Icon = plan.icon;
             return (
               <motion.div 
@@ -251,9 +273,11 @@ export default function ClubPage() {
             </div>
             <Link href="/signup" className="btn-outline inline-flex px-8 py-3 text-xs">
               S&apos;inscrire gratuitement
-            </Link>
-          </div>
-        </ScrollReveal>
+                </Link>
+              </div>
+            </ScrollReveal>
+          </>
+        )}
 
         {/* FAQ Preview or Benefits */}
         <section className="mt-32 pt-20 border-t border-brand-charcoal/50">
