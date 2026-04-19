@@ -12,7 +12,6 @@ async function getUsers() {
       email: true,
       image: true,
       isMember: true,
-      loyaltyPoints: true,
       createdAt: true,
       _count: {
         select: { appointments: true, orders: true },
@@ -62,7 +61,6 @@ export default async function AdminUsersPage() {
                   <th className="px-4 py-3">Statut</th>
                   <th className="px-4 py-3">RDV</th>
                   <th className="px-4 py-3 hidden sm:table-cell">Commandes</th>
-                  <th className="px-4 py-3 hidden sm:table-cell">Points</th>
                   <th className="px-4 py-3 hidden md:table-cell">Membre depuis</th>
                 </tr>
               </thead>
@@ -96,9 +94,6 @@ export default async function AdminUsersPage() {
                     </td>
                     <td className="px-4 py-3 text-sm text-brand-beige">{user._count.appointments}</td>
                     <td className="px-4 py-3 text-sm text-brand-beige hidden sm:table-cell">{user._count.orders}</td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      <span className="text-sm font-medium text-brand-gold">{user.loyaltyPoints}</span>
-                    </td>
                     <td className="px-4 py-3 text-sm text-brand-muted hidden md:table-cell">
                       {user.createdAt.toLocaleDateString("fr-CA", {
                         year: "numeric",

@@ -38,7 +38,6 @@ export default async function AccountPage() {
     where: { id: session.user.id }, 
     select: { 
       phone: true, 
-      loyaltyPoints: true,
       membershipTier: true,
       coupesUsed: true,
       lastResetDate: true
@@ -56,7 +55,7 @@ export default async function AccountPage() {
       membershipTier: dbUser?.membershipTier ?? "NONE",
       coupesUsed: dbUser?.coupesUsed ?? 0,
       phone: dbUser?.phone ?? null,
-      loyaltyPoints: dbUser?.loyaltyPoints ?? 0,
+      lastResetDate: dbUser?.lastResetDate?.toISOString() ?? null,
     },
     appointments: appointments.map((a) => ({
       id: a.id,

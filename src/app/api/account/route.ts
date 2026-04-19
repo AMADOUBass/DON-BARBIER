@@ -36,7 +36,6 @@ export async function DELETE(req: NextRequest) {
       image: null,
       passwordHash: null,
       isMember: false,
-      loyaltyPoints: 0,
     },
   });
 

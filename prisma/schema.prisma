@@ -22,7 +22,6 @@ model User {
   stripeSubId      String?       @unique
   coupesUsed       Int           @default(0)
   homeAddress      String?
-  loyaltyPoints    Int           @default(0)
   marketingConsent Boolean       @default(false)
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt

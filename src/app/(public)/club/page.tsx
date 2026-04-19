@@ -129,6 +129,23 @@ export default function ClubPage() {
           </div>
         </ScrollReveal>
 
+        {session?.user && (session.user as any)?.membershipTier && (session.user as any)?.membershipTier !== "NONE" && (
+          <ScrollReveal>
+            <div className="max-w-2xl mx-auto mb-16 p-8 rounded-3xl border border-brand-gold/30 bg-gradient-to-br from-brand-gold/10 to-brand-black text-center shadow-lg shadow-brand-gold/5">
+              <Crown className="w-10 h-10 text-brand-gold mx-auto mb-4" />
+              <h2 className="font-display text-2xl font-bold text-brand-beige mb-2">
+                Vous êtes membre {(session.user as any).membershipTier}
+              </h2>
+              <p className="text-sm text-brand-muted mb-6 leading-relaxed">
+                Profitez pleinement de vos avantages exclusifs et consultez vos coupes restantes directement depuis votre espace personnel.
+              </p>
+              <Link href="/account" className="btn-primary inline-flex">
+                Consulter mon Dashboard
+              </Link>
+            </div>
+          </ScrollReveal>
+        )}
+
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-8">
           {PLAN_TIERS.map((plan, idx) => {
@@ -176,24 +193,34 @@ export default function ClubPage() {
                     ))}
                   </ul>
 
-                  <button
-                    onClick={() => handleSubscribe(plan.id)}
-                    disabled={loading !== null}
-                    className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group ${
-                      plan.featured
-                        ? "bg-brand-gold text-brand-black hover:bg-brand-beige shadow-lg shadow-brand-gold/10"
-                        : "bg-brand-black/50 text-brand-gold border border-brand-gold/20 hover:bg-brand-gold hover:text-brand-black"
-                    }`}
-                  >
-                    {loading === plan.id ? (
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
-                    ) : (
-                      <>
-                        {plan.ctaText}
-                        <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </button>
+                  {session?.user && (session.user as any)?.membershipTier === plan.id ? (
+                    <Link
+                      href="/account"
+                      className="w-full py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 bg-brand-gold text-brand-black shadow-lg shadow-brand-gold/20"
+                    >
+                      <Check className="w-4 h-4" />
+                      Statut Actif
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleSubscribe(plan.id)}
+                      disabled={loading !== null || (session?.user && (session.user as any)?.membershipTier !== "NONE")}
+                      className={`w-full py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-2 group ${
+                        plan.featured
+                          ? "bg-brand-gold text-brand-black hover:bg-brand-beige shadow-lg shadow-brand-gold/10"
+                          : "bg-brand-black/50 text-brand-gold border border-brand-gold/20 hover:bg-brand-gold hover:text-brand-black"
+                      } ${session?.user && (session.user as any)?.membershipTier !== "NONE" ? "opacity-50 cursor-not-allowed hidden" : ""}`}
+                    >
+                      {loading === plan.id ? (
+                        <div className="w-4 h-4 border-2 border-current border-t-transparent animate-spin rounded-full" />
+                      ) : (
+                        <>
+                          {plan.ctaText}
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
+                    </button>
+                  )}
               </motion.div>
             );
           })}

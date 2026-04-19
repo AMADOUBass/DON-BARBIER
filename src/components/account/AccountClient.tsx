@@ -93,7 +93,7 @@ interface Props {
     membershipTier: MembershipTier | string;
     coupesUsed: number;
     phone: string | null;
-    loyaltyPoints: number;
+    lastResetDate: string | null;
   };
   appointments: Appointment[];
   orders: Order[];
@@ -459,15 +459,6 @@ export function AccountClient({
               </p>
               <p className="text-xs text-brand-muted">Commandes</p>
             </div>
-            {user.role === "CLIENT" && (
-              <div className="border-l border-brand-charcoal pl-4">
-                <p className="font-display text-2xl font-bold text-brand-gold flex items-center gap-1 justify-center">
-                  <Gift className="w-4 h-4" />
-                  {user.loyaltyPoints}
-                </p>
-                <p className="text-xs text-brand-muted">Points</p>
-              </div>
-            )}
           </div>
         </motion.div>
 
@@ -828,6 +819,12 @@ export function AccountClient({
                           ? "Rejoignez le club pour profiter d'avantages exclusifs et de coupes mensuelles."
                           : `Vous profitez pleinement de vos avantages exclusifs liés à l'abonnement ${TIER_STYLES[user.membershipTier]?.label}.`}
                       </p>
+                      {user.membershipTier !== "NONE" && user.lastResetDate && (
+                        <p className={`text-[11px] mt-2 flex items-center gap-1 font-medium ${TIER_STYLES[user.membershipTier]?.textClass}`}>
+                          <Clock className="w-3.5 h-3.5 opacity-70" />
+                          Vos avantages se renouvelleront le {new Date(new Date(user.lastResetDate).getTime() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long" })}
+                        </p>
+                      )}
                     </div>
                   </div>
 
