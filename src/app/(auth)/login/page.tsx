@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 import { Eye, EyeOff, LogIn, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -49,18 +50,25 @@ function LoginForm() {
       return;
     }
 
-    // Redirect to server-side post-login page which reads the role from the JWT
+    // We keep loading=true to freeze the UI while Next.js fetches the new page
     if (callbackUrl && callbackUrl !== "/") {
-      window.location.href = callbackUrl;
+      router.push(callbackUrl);
     } else {
-      window.location.href = "/post-login";
+      router.push("/post-login");
     }
+    router.refresh();
   };
 
   const handleGoogle = () => signIn("google", { callbackUrl });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }} 
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20"
+    >
       <div className="w-full max-w-md">
         <Link 
           href="/" 
@@ -156,7 +164,7 @@ function LoginForm() {
           </form>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

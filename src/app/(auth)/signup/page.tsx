@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
 import { Eye, EyeOff, UserPlus, ArrowLeft } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -68,6 +69,8 @@ export default function SignupPage() {
       await signIn("credentials", { email: form.email, password: form.password, redirect: false });
       toast.success("Bienvenue chez Don Barbier !");
       router.push("/");
+      router.refresh();
+      // Notice: we do NOT call setLoading(false) here, so the button keeps spinning while Nuxt transitions the page smoothly.
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
       setLoading(false);
@@ -75,7 +78,13 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20">
+    <motion.div 
+      initial={{ opacity: 0, y: 15 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      exit={{ opacity: 0, y: -15 }} 
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen flex items-center justify-center bg-brand-black px-4 pt-20"
+    >
       <div className="w-full max-w-md">
         <Link 
           href="/" 
@@ -179,7 +188,7 @@ export default function SignupPage() {
           </p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
