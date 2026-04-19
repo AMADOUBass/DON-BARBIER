@@ -39,6 +39,8 @@ export async function POST(req: NextRequest) {
     }
 
     const isMember = session.user.isMember ?? false;
+    const userTier = (session.user as any).membershipTier;
+    const isEliteOrPrestige = userTier === "ELITE" || userTier === "PRESTIGE";
 
     for (const item of items) {
       const product = products.find((p) => p.id === item.productId)!;
@@ -58,10 +60,14 @@ export async function POST(req: NextRequest) {
 
     const lineItems = items.map((item) => {
       const product = products.find((p) => p.id === item.productId)!;
-      const unitPrice =
-        isMember && product.memberPrice
-          ? parseFloat(product.memberPrice.toString())
-          : parseFloat(product.price.toString());
+      let unitPrice = parseFloat(product.price.toString());
+      
+      if (isMember && product.memberPrice) {
+        unitPrice = parseFloat(product.memberPrice.toString());
+      } else if (isEliteOrPrestige) {
+        unitPrice = unitPrice * 0.90; // 10% discount for VIP
+      }
+      
       return { productId: item.productId, quantity: item.quantity, unitPrice };
     });
 

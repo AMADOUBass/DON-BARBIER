@@ -158,7 +158,7 @@ export function MobileTabBar() {
                       <User className="w-4 h-4" /> Mon Compte
                     </Link>
                     <button 
-                      onClick={() => { setMenuOpen(false); signOut(); }}
+                      onClick={() => { setMenuOpen(false); signOut({ callbackUrl: "/" }); }}
                       className="flex items-center justify-center gap-2 p-3 rounded-xl bg-red-500/10 text-red-400 text-sm font-medium col-span-2"
                     >
                       <LogOut className="w-4 h-4" /> Déconnexion

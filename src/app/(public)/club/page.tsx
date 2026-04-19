@@ -51,7 +51,7 @@ const PLAN_TIERS = [
       "Contours illimités",
       "Accès calendrier étendu (Après 18h)",
       "Zéro attente - Rendez-vous prioritaire",
-      "Toute la boutique à -15%",
+      "Toute la boutique à -10%",
     ],
   },
   {

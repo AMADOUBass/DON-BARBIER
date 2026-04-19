@@ -9,6 +9,7 @@ import {
   Calendar,
   ShoppingBag,
   Crown,
+  Gem,
   Clock,
   CheckCircle2,
   Package,
@@ -119,6 +120,49 @@ const ORDER_STATUS: Record<OrderStatus, { label: string; color: string }> = {
   DELIVERED: { label: "Livré", color: "text-green-400 bg-green-400/10" },
   CANCELLED: { label: "Annulé", color: "text-red-400 bg-red-400/10" },
   REFUNDED: { label: "Remboursé", color: "text-brand-muted bg-brand-muted/10" },
+};
+
+const TIER_STYLES: Record<
+  string,
+  {
+    icon: any;
+    label: string;
+    cardClass: string;
+    textClass: string;
+    badgeClass: string;
+    iconWrapper: string;
+  }
+> = {
+  SIGNATURE: {
+    icon: Star,
+    label: "Signature",
+    cardClass:
+      "bg-gradient-to-br from-brand-charcoal to-black border-brand-gold/30 shadow-[0_0_20px_rgba(212,175,55,0.08)]",
+    textClass: "text-brand-gold",
+    badgeClass:
+      "bg-gradient-to-r from-yellow-600 via-brand-gold to-yellow-600 text-brand-black shadow-lg shadow-brand-gold/20",
+    iconWrapper: "bg-brand-gold/10 text-brand-gold",
+  },
+  ELITE: {
+    icon: Crown,
+    label: "Élite",
+    cardClass:
+      "bg-gradient-to-br from-[#1a1a1a] to-black border-zinc-500/40 shadow-[0_0_25px_rgba(255,255,255,0.05)]",
+    textClass: "text-zinc-300",
+    badgeClass:
+      "bg-gradient-to-r from-zinc-500 via-zinc-300 to-zinc-500 text-black shadow-lg shadow-white/10",
+    iconWrapper: "bg-zinc-800 text-zinc-300",
+  },
+  PRESTIGE: {
+    icon: Gem,
+    label: "Prestige",
+    cardClass:
+      "bg-gradient-to-br from-slate-900 to-black border-blue-400/30 shadow-[0_0_30px_rgba(96,165,250,0.15)]",
+    textClass: "text-blue-300",
+    badgeClass:
+      "bg-gradient-to-r from-blue-500 via-cyan-300 to-blue-500 text-brand-black shadow-lg shadow-blue-500/30",
+    iconWrapper: "bg-blue-500/10 text-blue-400",
+  },
 };
 
 function Badge({ label, color }: { label: string; color: string }) {
@@ -377,11 +421,7 @@ export function AccountClient({
           <div
             className="relative group cursor-pointer"
             onClick={() => setTab("profile")}>
-            <UserAvatar 
-              src={avatarUrl} 
-              name={user.name} 
-              size="xl" 
-            />
+            <UserAvatar src={avatarUrl} name={user.name} size="xl" />
             <div className="absolute inset-0 bg-brand-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
               <User className="w-6 h-6 text-brand-gold" />
             </div>
@@ -391,12 +431,18 @@ export function AccountClient({
               <h1 className="font-display text-2xl font-bold text-brand-beige">
                 {user.name ?? "Mon compte"}
               </h1>
-              {user.membershipTier !== "NONE" && user.role === "CLIENT" && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-brand-gold bg-brand-gold/10 border border-brand-gold/20 px-2.5 py-0.5 rounded-full">
-                  <Crown className="w-3 h-3" />
-                  Club {user.membershipTier.charAt(0) + user.membershipTier.slice(1).toLowerCase()}
-                </span>
-              )}
+              {user.membershipTier !== "NONE" &&
+                user.role === "CLIENT" &&
+                TIER_STYLES[user.membershipTier] && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full ${TIER_STYLES[user.membershipTier]?.badgeClass || ""}`}>
+                    {(() => {
+                      const Icon = TIER_STYLES[user.membershipTier]?.icon;
+                      return Icon ? <Icon className="w-3 h-3" /> : null;
+                    })()}
+                    Club {TIER_STYLES[user.membershipTier]?.label}
+                  </span>
+                )}
             </div>
             <p className="text-brand-muted text-sm mt-0.5">{user.email}</p>
           </div>
@@ -670,7 +716,7 @@ export function AccountClient({
                   Laissez vide si vous ne souhaitez pas changer de mot de passe.
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="label">Mot de passe actuel</label>
@@ -733,46 +779,94 @@ export function AccountClient({
 
             {/* Membership Tier Card */}
             {user.role === "CLIENT" && (
-              <div className="card border border-brand-gold/20 bg-brand-gold/5">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div
+                className={`card border relative overflow-hidden ${user.membershipTier !== "NONE" && TIER_STYLES[user.membershipTier] ? TIER_STYLES[user.membershipTier]?.cardClass : "border-brand-gold/20 bg-brand-gold/5"}`}>
+                {user.membershipTier !== "NONE" &&
+                  TIER_STYLES[user.membershipTier] && (
+                    <div
+                      className={`absolute -right-10 -top-10 w-40 h-40 opacity-10 blur-2xl rounded-full ${TIER_STYLES[user.membershipTier]?.iconWrapper || ""}`}
+                    />
+                  )}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center shrink-0">
-                      <Crown className="w-6 h-6 text-brand-gold" />
-                    </div>
+                    {user.membershipTier !== "NONE" &&
+                    TIER_STYLES[user.membershipTier] ? (
+                      (() => {
+                        const style = TIER_STYLES[user.membershipTier];
+                        const Icon = style?.icon;
+                        return Icon ? (
+                          <div
+                            className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${style?.iconWrapper || ""}`}>
+                            <Icon className="w-6 h-6" />
+                          </div>
+                        ) : null;
+                      })()
+                    ) : (
+                      <div className="w-12 h-12 bg-brand-gold/10 rounded-xl flex items-center justify-center shrink-0">
+                        <Crown className="w-6 h-6 text-brand-gold" />
+                      </div>
+                    )}
+
                     <div>
                       <h3 className="font-display text-lg font-semibold text-brand-beige">
-                        Statut Club Privé : <span className="text-brand-gold">{user.membershipTier !== "NONE" ? user.membershipTier : "Non-membre"}</span>
+                        Statut Club Privé :{" "}
+                        <span
+                          className={
+                            user.membershipTier !== "NONE" &&
+                            TIER_STYLES[user.membershipTier]
+                              ? TIER_STYLES[user.membershipTier]?.textClass
+                              : "text-brand-gold"
+                          }>
+                          {user.membershipTier !== "NONE" &&
+                          TIER_STYLES[user.membershipTier]
+                            ? TIER_STYLES[user.membershipTier]?.label
+                            : "Non-membre"}
+                        </span>
                       </h3>
-                      <p className="text-sm text-brand-muted mt-1">
-                        {user.membershipTier === "NONE" 
+                      <p className="text-sm text-brand-muted mt-1 max-w-md">
+                        {user.membershipTier === "NONE"
                           ? "Rejoignez le club pour profiter d'avantages exclusifs et de coupes mensuelles."
-                          : `Vous profitez pleinement de vos avantages forfait ${user.membershipTier}.`}
+                          : `Vous profitez pleinement de vos avantages exclusifs liés à l'abonnement ${TIER_STYLES[user.membershipTier]?.label}.`}
                       </p>
                     </div>
                   </div>
-                  
+
                   {user.membershipTier !== "NONE" ? (
-                    <div className="flex flex-col items-center md:items-end gap-2">
-                       <div className="flex items-center gap-2">
-                          {[1, 2, 3, 4].map((i) => (
-                            <div 
-                              key={i} 
-                              className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-all ${
-                                i <= (user as any).coupesUsed 
-                                  ? "bg-brand-gold border-brand-gold text-brand-black" 
-                                  : "border-brand-gold/30 text-brand-gold/50"
-                              }`}
-                            >
-                              <CheckCircle2 className="w-4 h-4" />
+                    <div className="flex flex-col items-center md:items-end gap-2 shrink-0">
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4].map((i) => {
+                          const isUsed = i <= (user as any).coupesUsed;
+                          const tClass =
+                            TIER_STYLES[user.membershipTier]?.textClass;
+                          const iconWrap =
+                            TIER_STYLES[user.membershipTier]?.iconWrapper;
+                          return (
+                            <div
+                              key={i}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                                isUsed
+                                  ? `bg-brand-black/50 border border-white/5 opacity-50`
+                                  : `${iconWrap || ""} font-bold shadow-md`
+                              }`}>
+                              {isUsed ? (
+                                <CheckCircle2 className="w-3 h-3 text-brand-muted" />
+                              ) : (
+                                <span className="text-xs">{i}</span>
+                              )}
                             </div>
-                          ))}
-                       </div>
-                       <p className="text-[10px] uppercase tracking-widest text-brand-gold/80 font-bold">
-                          {4 - (user as any).coupesUsed} coupes restantes ce mois
-                       </p>
+                          );
+                        })}
+                      </div>
+                      <p
+                        className={`text-[10px] uppercase tracking-widest font-bold ${TIER_STYLES[user.membershipTier]?.textClass}`}>
+                        {Math.max(0, 4 - (user as any).coupesUsed)} coupes
+                        restantes ce mois
+                      </p>
                     </div>
                   ) : (
-                    <Link href="/club" className="btn-primary py-2 px-6 text-sm">
+                    <Link
+                      href="/club"
+                      className="btn-primary py-2 px-6 text-sm shrink-0">
                       Voir les forfaits
                     </Link>
                   )}
@@ -1276,4 +1370,3 @@ function Empty({
     </div>
   );
 }
-

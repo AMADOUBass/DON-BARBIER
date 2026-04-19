@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Minus, Plus, Trash2, ArrowRight, Tag, ChevronLeft, CreditCard, Mail, Loader2 } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Trash2, ArrowRight, Tag, ChevronLeft, CreditCard, Mail, Loader2, Crown } from "lucide-react";
 import { useCartStore } from "@/hooks/useCartStore";
 import { formatPrice } from "@/lib/utils";
 import { useSession } from "next-auth/react";
@@ -94,8 +94,14 @@ export default function CartPage() {
     );
   }
 
-  const subtotal = totalPrice();
-  const shipping = 0; // Temporairement gratuit pour les tests (au lieu de 9.99$)
+  const userTier = (session?.user as any)?.membershipTier;
+  const isEliteOrPrestige = userTier === "ELITE" || userTier === "PRESTIGE";
+  
+  const rawSubtotal = totalPrice();
+  const vipDiscount = isEliteOrPrestige ? rawSubtotal * 0.10 : 0;
+  const subtotal = rawSubtotal - vipDiscount;
+
+  const shipping = 0; // Temporairement gratuit pour les tests
   const total = subtotal + shipping;
 
   return (
@@ -216,9 +222,15 @@ export default function CartPage() {
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-brand-muted">
-                  <span>Sous-total</span>
-                  <span className="text-brand-beige">{formatPrice(subtotal)}</span>
+                  <span>Sous-total original</span>
+                  <span className="text-brand-beige">{formatPrice(rawSubtotal)}</span>
                 </div>
+                {isEliteOrPrestige && (
+                  <div className="flex justify-between text-brand-gold">
+                    <span className="flex items-center gap-1"><Crown className="w-3.5 h-3.5" /> Rabais VIP (-10%)</span>
+                    <span>-{formatPrice(vipDiscount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-brand-muted">
                   <span>Livraison</span>
                   <span className={shipping === 0 ? "text-green-400" : "text-brand-beige"}>
