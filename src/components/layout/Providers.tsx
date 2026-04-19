@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { PHProvider } from "./PostHogProvider";
+import { WelcomeToast } from "@/components/ui/WelcomeToast";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -19,7 +20,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <PHProvider>
       <SessionProvider>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <WelcomeToast />
+          {children}
+        </QueryClientProvider>
       </SessionProvider>
     </PHProvider>
   );

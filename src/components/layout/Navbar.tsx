@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { useCartStore } from "@/hooks/useCartStore";
 import { UserAvatar } from "@/components/ui/UserAvatar";
 import { CartSync } from "@/components/cart/CartSync";
+import { NotificationBadge } from "@/components/layout/NotificationBadge";
 
 const navLinks = [
   { href: "/", label: "Accueil" },
@@ -120,6 +121,7 @@ export function Navbar() {
                   name={session.user.name} 
                   size="sm" 
                 />
+                <NotificationBadge />
                 <ChevronDown className="w-4 h-4 text-brand-muted" />
               </button>
 
@@ -247,8 +249,12 @@ export function Navbar() {
                       </Link>
                     )}
                     <Link href="/account" onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-2 py-3 rounded-lg text-base text-brand-beige hover:text-brand-gold hover:bg-white/5 transition-colors">
-                      <User className="w-5 h-5" /> Mon profil
+                      className="flex items-center gap-3 px-2 py-3 rounded-lg text-base text-brand-beige hover:text-brand-gold hover:bg-white/5 transition-colors relative">
+                      <div className="relative">
+                        <User className="w-5 h-5" />
+                        <NotificationBadge />
+                      </div>
+                      Mon profil
                     </Link>
                     <button
                       onClick={() => { setMobileOpen(false); void signOut({ callbackUrl: "/" }); }}
