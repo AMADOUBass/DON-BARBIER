@@ -11,6 +11,7 @@ import {
 import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { UploadDropzone } from "@/lib/uploadthing";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 type Specialty = 
   | "RETWIST" | "INTERLOCKS" | "WOMENS_STYLING" | "STARTER_LOCS" 
@@ -89,6 +90,12 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
   const [blockForm, setBlockForm] = useState({ date: "", startTime: "09:00", endTime: "17:00", reason: "" });
   const [savingBlock, setSavingBlock] = useState(false);
 
+  // Confirm dialogs
+  const [confirmDeletePhoto, setConfirmDeletePhoto] = useState<string | null>(null);
+  const [confirmDeleteSlot, setConfirmDeleteSlot] = useState<string | null>(null);
+  const [confirmComplete, setConfirmComplete] = useState<string | null>(null);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+
   // Editable availability
   const [editAvailability, setEditAvailability] = useState(
     DAY_LABELS.map((label, i) => {
@@ -136,13 +143,16 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
   }
 
   async function deletePortfolioPhoto(id: string) {
-    if (!confirm("Supprimer cette photo ?")) return;
+    setConfirmLoading(true);
     try {
       await fetch(`/api/stylists/${stylist.id}/portfolio/${id}`, { method: "DELETE" });
       setPortfolio((prev) => prev.filter((p) => p.id !== id));
       toast.success("Photo supprimée");
     } catch {
       toast.error("Erreur");
+    } finally {
+      setConfirmLoading(false);
+      setConfirmDeletePhoto(null);
     }
   }
 
@@ -219,17 +229,21 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
   }
 
   async function deleteBlockedSlot(id: string) {
-    if (!confirm("Supprimer ce créneau bloqué ?")) return;
+    setConfirmLoading(true);
     try {
       await fetch(`/api/blocked-slots?id=${id}`, { method: "DELETE" });
       setBlockedSlots((prev) => prev.filter((s) => s.id !== id));
       toast.success("Créneau supprimé");
     } catch {
       toast.error("Erreur");
+    } finally {
+      setConfirmLoading(false);
+      setConfirmDeleteSlot(null);
     }
   }
 
   async function markCompleted(apptId: string) {
+    setConfirmLoading(true);
     try {
       const res = await fetch(`/api/appointments/${apptId}`, {
         method: "PATCH",
@@ -238,9 +252,12 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
       });
       if (!res.ok) throw new Error();
       setAppointments((prev) => prev.filter((a) => a.id !== apptId));
-      toast.success("Rendez-vous marqué comme terminé");
+      toast.success("Rendez-vous marqué comme terminé ✓");
     } catch {
       toast.error("Erreur");
+    } finally {
+      setConfirmLoading(false);
+      setConfirmComplete(null);
     }
   }
 
@@ -376,7 +393,7 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
                           </p>
                         )}
                         <button
-                          onClick={(e) => { e.stopPropagation(); void markCompleted(appt.id); }}
+                          onClick={(e) => { e.stopPropagation(); setConfirmComplete(appt.id); }}
                           className="inline-flex items-center gap-1.5 text-xs bg-green-400/10 text-green-400 px-3 py-1.5 rounded-lg hover:bg-green-400/20 transition-colors mt-1"
                         >
                           <CheckSquare className="w-3.5 h-3.5" /> Marquer terminé
@@ -452,7 +469,7 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
                       {photo.caption && <p className="text-xs text-white line-clamp-2">{photo.caption}</p>}
                     </div>
                     <button
-                      onClick={() => void deletePortfolioPhoto(photo.id)}
+                      onClick={() => setConfirmDeletePhoto(photo.id)}
                       className="p-1.5 rounded-lg bg-red-400/20 text-red-400 hover:bg-red-400/30 transition-colors ml-2"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -624,7 +641,7 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
                       </p>
                       {slot.reason && <p className="text-xs text-brand-muted">{slot.reason}</p>}
                     </div>
-                    <button onClick={() => void deleteBlockedSlot(slot.id)} className="text-red-400 hover:text-red-300 p-1">
+                    <button onClick={() => setConfirmDeleteSlot(slot.id)} className="text-red-400 hover:text-red-300 p-1">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -698,6 +715,37 @@ export function PortalClient({ stylist, appointments: initialAppts, pastAppointm
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Confirm dialogs */}
+      <ConfirmDialog
+        open={!!confirmDeletePhoto}
+        title="Supprimer cette photo ?"
+        description="Cette action est irréversible. La photo sera retirée de votre portfolio."
+        confirmLabel="Supprimer"
+        danger
+        loading={confirmLoading}
+        onConfirm={() => confirmDeletePhoto && void deletePortfolioPhoto(confirmDeletePhoto)}
+        onCancel={() => setConfirmDeletePhoto(null)}
+      />
+      <ConfirmDialog
+        open={!!confirmDeleteSlot}
+        title="Supprimer ce créneau bloqué ?"
+        description="Le créneau sera retiré et les clients pourront réserver à cette heure."
+        confirmLabel="Supprimer"
+        danger
+        loading={confirmLoading}
+        onConfirm={() => confirmDeleteSlot && void deleteBlockedSlot(confirmDeleteSlot)}
+        onCancel={() => setConfirmDeleteSlot(null)}
+      />
+      <ConfirmDialog
+        open={!!confirmComplete}
+        title="Marquer le rendez-vous comme terminé ?"
+        description='Le statut passera à "Terminé" et il sera retiré de votre agenda actif.'
+        confirmLabel="Confirmer"
+        loading={confirmLoading}
+        onConfirm={() => confirmComplete && void markCompleted(confirmComplete)}
+        onCancel={() => setConfirmComplete(null)}
+      />
     </div>
   );
 }
